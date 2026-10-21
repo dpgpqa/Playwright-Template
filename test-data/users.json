@@ -1,0 +1,30 @@
+[
+  {
+    "email": "qa_bot@example.com",
+    "password": "Passw0rd!",
+    "firstName": "QA",
+    "lastName": "Bot",
+    "company": "Nous Research",
+    "address1": "123 Test Street",
+    "address2": "Suite 100",
+    "country": "United States",
+    "state": "California",
+    "city": "San Francisco",
+    "zipcode": "94102",
+    "phone": "+15551234567"
+  },
+  {
+    "email": "invalid@example.com",
+    "password": "wrongpass",
+    "firstName": "Invalid",
+    "lastName": "User",
+    "company": "Test Corp",
+    "address1": "456 Fake Ave",
+    "address2": "",
+    "country": "United States",
+    "state": "New York",
+    "city": "New York",
+    "zipcode": "10001",
+    "phone": "+15559876543"
+  }
+]
