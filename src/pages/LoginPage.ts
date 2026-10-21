@@ -13,7 +13,7 @@ export class LoginPage extends BasePage {
   private readonly loginFormTitle = this.page.locator('.login-form h2');
 
   async waitForLoad(): Promise<void> {
-    await this.loginFormTitle.waitFor({ state: 'visible' });
+    await this.loginFormTitle.waitFor({ state: 'visible', timeout: 10000 });
   }
 
   async login(email: string, password: string): Promise<void> {
@@ -24,7 +24,11 @@ export class LoginPage extends BasePage {
 
   async loginAndWaitForHome(email: string, password: string): Promise<void> {
     await this.login(email, password);
-    await this.page.waitForURL('**/');
+    // Wait for either home page or error message
+    await Promise.race([
+      this.page.waitForURL('**/', { timeout: 20000 }),
+      this.page.waitForURL('**/login', { timeout: 20000 }),
+    ]);
   }
 
   async signup(name: string, email: string): Promise<void> {

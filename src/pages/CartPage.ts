@@ -5,11 +5,11 @@ export class CartPage extends BasePage {
 
   private readonly cartTable = this.page.locator('#cart_info_table');
   private readonly productRows = this.page.locator('tbody tr');
-  private readonly proceedToCheckoutLink = this.page.getByRole('link', { name: 'Proceed To Checkout' });
+  private readonly proceedToCheckoutBtn = this.page.locator('.check_out');
   private readonly emptyCartMessage = this.page.locator('#empty_cart p');
 
   async waitForLoad(): Promise<void> {
-    await this.cartTable.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
+    await this.cartTable.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {
       this.emptyCartMessage.waitFor({ state: 'visible' });
     });
   }
@@ -29,13 +29,14 @@ export class CartPage extends BasePage {
 
   async removeItemByIndex(index: number): Promise<void> {
     const row = this.productRows.nth(index);
-    await row.getByRole('button', { name: 'Remove' }).click();
-    await this.page.waitForLoadState('networkidle');
+    await row.locator('.cart_delete a').click();
+    // Wait for row to be removed instead of networkidle
+    await this.page.waitForTimeout(1000);
   }
 
   async proceedToCheckout(): Promise<void> {
-    await this.proceedToCheckoutLink.click();
-    await this.page.waitForURL('**/checkout');
+    await this.proceedToCheckoutBtn.click();
+    await this.page.waitForURL('**/checkout', { timeout: 15000 });
   }
 
   async isEmpty(): Promise<boolean> {

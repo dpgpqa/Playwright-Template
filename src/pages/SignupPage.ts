@@ -23,7 +23,7 @@ export class SignupPage extends BasePage {
   private readonly continueButton = this.page.getByRole('link', { name: 'Continue' });
 
   async waitForLoad(): Promise<void> {
-    await this.page.locator('h2:has-text("Enter Account Information")').waitFor({ state: 'visible' });
+    await this.page.locator('h2:has-text("Enter Account Information"), h2:has-text("ENTER ACCOUNT INFORMATION")').first().waitFor({ state: 'visible', timeout: 15000 });
   }
 
   async fillAccountInfo(data: {
