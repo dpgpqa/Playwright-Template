@@ -30,6 +30,7 @@ type TestFixtures = {
 
 export const test = base.extend<TestFixtures & WorkerFixtures>({
   // Worker-scoped auth: each worker logs in once and reuses the session
+  // eslint-disable-next-line no-empty-pattern
   workerStorageState: async ({}, use) => {
     const authDir = path.resolve('.auth');
     if (!fs.existsSync(authDir)) fs.mkdirSync(authDir, { recursive: true });
