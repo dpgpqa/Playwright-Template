@@ -118,8 +118,6 @@ test.describe('API: DummyJSON @api', () => {
   });
 
   test('CRUD product flow @api', async () => {
-    await api.login(process.env.DUMMYJSON_USERNAME!, process.env.DUMMYJSON_PASSWORD!);
-
     // Note: DummyJSON is a mock API - POST/PUT/DELETE don't actually persist
     // Test GET endpoints which work reliably
     const products = await api.getProducts({ limit: 1 });
