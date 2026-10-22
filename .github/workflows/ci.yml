@@ -218,41 +218,45 @@ jobs:
           name: regression-test-results
           path: artifacts/regression
 
-      - name: Generate Allure HTML reports
+      - name: Setup Java (Required for Allure CLI)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install allure-commandline
+        run: npm install --no-save allure-commandline
+
+      - name: Generar Allure Reports (Smoke, API, a11y, Regression + Unificado)
+        timeout-minutes: 5
         run: |
-          mkdir -p merged-reports/smoke merged-reports/api merged-reports/a11y merged-reports/regression
-          
-          # Generate Allure HTML report for each suite
-          if [ -d "artifacts/smoke/allure-results" ] && [ "$(ls -A artifacts/smoke/allure-results)" ]; then
-            echo "Generating Allure report for smoke..."
-            npx allure generate artifacts/smoke/allure-results -o merged-reports/smoke --clean
-          else
-            echo "No allure results for smoke, creating fallback"
-            echo '<html><body><h1>Smoke Tests</h1><p>No Allure report available.</p></body></html>' > merged-reports/smoke/index.html
-          fi
+          mkdir -p merged-reports
+          ALL_SOURCES=""
 
-          if [ -d "artifacts/api/allure-results" ] && [ "$(ls -A artifacts/api/allure-results)" ]; then
-            echo "Generating Allure report for API..."
-            npx allure generate artifacts/api/allure-results -o merged-reports/api --clean
-          else
-            echo "No allure results for API, creating fallback"
-            echo '<html><body><h1>API Tests</h1><p>No Allure report available.</p></body></html>' > merged-reports/api/index.html
-          fi
+          for suite in smoke api a11y regression; do
+            if [ -d "artifacts/$suite/allure-results" ]; then
+              SRC="artifacts/$suite/allure-results"
+            elif [ -d "artifacts/$suite" ]; then
+              SRC="artifacts/$suite"
+            else
+              echo "⚠️ No se encontraron resultados para $suite, saltando..."
+              continue
+            fi
 
-          if [ -d "artifacts/a11y/allure-results" ] && [ "$(ls -A artifacts/a11y/allure-results)" ]; then
-            echo "Generating Allure report for a11y..."
-            npx allure generate artifacts/a11y/allure-results -o merged-reports/a11y --clean
-          else
-            echo "No allure results for a11y, creating fallback"
-            echo '<html><body><h1>Accessibility Tests</h1><p>No Allure report available.</p></body></html>' > merged-reports/a11y/index.html
-          fi
+            # Verificar que existan archivos JSON antes de invocar a Allure
+            if ls "$SRC"/*.json 1> /dev/null 2>&1; then
+              echo "✅ Generando reporte Allure individual para $suite desde$SRC..."
+              ./node_modules/.bin/allure generate "$SRC" -o "merged-reports/$suite" --clean
+              ALL_SOURCES="$ALL_SOURCES$SRC"
+            else
+              echo "⚠️ Directorio $SRC sin archivos JSON para$suite"
+            fi
+          done
 
-          if [ -d "artifacts/regression/allure-results" ] && [ "$(ls -A artifacts/regression/allure-results)" ]; then
-            echo "Generating Allure report for regression..."
-            npx allure generate artifacts/regression/allure-results -o merged-reports/regression --clean
-          else
-            echo "No allure results for regression, creating fallback"
-            echo '<html><body><h1>Regression Tests</h1><p>No Allure report available.</p></body></html>' > merged-reports/regression/index.html
+          # Opcional: Generar también un Dashboard maestro unificado con las 4 suites juntas
+          if [ -n "$ALL_SOURCES" ]; then
+            echo "📊 Generando Dashboard Allure Unificado..."
+            ./node_modules/.bin/allure generate $ALL_SOURCES -o "merged-reports/allure-full" --clean
           fi
 
       - name: Create index page
@@ -291,6 +295,7 @@ jobs:
                 <a href="./api/index.html">🔌 API Tests</a>
                 <a href="./a11y/index.html">♿ Accessibility Tests</a>
                 <a href="./regression/index.html">🔄 Regression Tests</a>
+                <a href="./allure-full/index.html">📊 Dashboard Unificado</a>
               </div>
             </div>
 

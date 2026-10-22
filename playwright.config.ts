@@ -17,7 +17,7 @@ export default defineConfig({
   reporter: isCI
     ? [
         ['blob', { outputDir: 'blob-report' }],
-        ['./src/reporters/allure-reporter.js', { outputFolder: 'allure-results', detail: true, suiteTitle: true }],
+        ['./src/reporters/allure-reporter.js', { resultsDir: 'allure-results', detail: true, suiteTitle: true }],
         ['github'],
         ['json', { outputFile: 'reports/results.json' }],
       ]
