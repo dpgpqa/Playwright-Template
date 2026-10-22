@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import * as dotenv from 'dotenv';
+import AllureReporter from 'allure-playwright';
 
 dotenv.config({ path: '.env.local' });
 
@@ -17,7 +18,14 @@ export default defineConfig({
   reporter: isCI
     ? [
         ['blob', { outputDir: 'blob-report' }],
-        ['html', { outputFolder: 'playwright-report', open: 'never' }],
+        [
+          AllureReporter,
+          {
+            outputFolder: 'allure-results',
+            detail: true,
+            suiteTitle: true,
+          },
+        ],
         ['github'],
         ['json', { outputFile: 'reports/results.json' }],
       ]
