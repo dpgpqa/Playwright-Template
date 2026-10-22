@@ -59,10 +59,6 @@ jobs:
           BASE_URL: https://automationexercise.com
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
-          AI_PROVIDER: ${{ secrets.AI_PROVIDER }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - name: Upload smoke test results
         if: always()
@@ -71,7 +67,7 @@ jobs:
           name: smoke-test-results
           path: |
             blob-report/
-            ai-report/
+            playwright-report/
             reports/
           retention-days: 7
 
@@ -98,10 +94,6 @@ jobs:
           DUMMYJSON_BASE_URL: https://dummyjson.com
           DUMMYJSON_USERNAME: ${{ secrets.DUMMYJSON_USERNAME }}
           DUMMYJSON_PASSWORD: ${{ secrets.DUMMYJSON_PASSWORD }}
-          AI_PROVIDER: ${{ secrets.AI_PROVIDER }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - name: Upload API test results
         if: always()
@@ -110,7 +102,7 @@ jobs:
           name: api-test-results
           path: |
             blob-report/
-            ai-report/
+            playwright-report/
             reports/
           retention-days: 7
 
@@ -138,10 +130,6 @@ jobs:
         run: npm run test:a11y
         env:
           BASE_URL: https://automationexercise.com
-          AI_PROVIDER: ${{ secrets.AI_PROVIDER }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - name: Upload a11y test results
         if: always()
@@ -150,7 +138,7 @@ jobs:
           name: a11y-test-results
           path: |
             blob-report/
-            ai-report/
+            playwright-report/
             reports/
           retention-days: 7
 
@@ -180,10 +168,6 @@ jobs:
           BASE_URL: https://automationexercise.com
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
-          AI_PROVIDER: ${{ secrets.AI_PROVIDER }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - name: Upload regression test results
         if: always()
@@ -192,7 +176,7 @@ jobs:
           name: regression-test-results
           path: |
             blob-report/
-            ai-report/
+            playwright-report/
             reports/
           retention-days: 7
 
@@ -234,29 +218,18 @@ jobs:
           name: regression-test-results
           path: artifacts/regression
 
-      - name: Debug: list AI report files
-        run: |
-          echo "=== Smoke ai-report ==="
-          find artifacts/smoke/ai-report -type f 2>/dev/null || echo "Directory not found"
-          echo "=== API ai-report ==="
-          find artifacts/api/ai-report -type f 2>/dev/null || echo "Directory not found"
-          echo "=== A11Y ai-report ==="
-          find artifacts/a11y/ai-report -type f 2>/dev/null || echo "Directory not found"
-          echo "=== Regression ai-report ==="
-          find artifacts/regression/ai-report -type f 2>/dev/null || echo "Directory not found"
-
-      - name: Copy AI reports to merged-reports
+      - name: Copy Playwright HTML reports
         run: |
           mkdir -p merged-reports/smoke merged-reports/api merged-reports/a11y merged-reports/regression
-          # Copy AI reporter HTML from each suite
-          cp artifacts/smoke/ai-report/test-health-report.html merged-reports/smoke/index.html 2>/dev/null || \
-            echo '<html><body><h1>Smoke Tests</h1><p>No AI report available.</p></body></html>' > merged-reports/smoke/index.html
-          cp artifacts/api/ai-report/test-health-report.html merged-reports/api/index.html 2>/dev/null || \
-            echo '<html><body><h1>API Tests</h1><p>No AI report available.</p></body></html>' > merged-reports/api/index.html
-          cp artifacts/a11y/ai-report/test-health-report.html merged-reports/a11y/index.html 2>/dev/null || \
-            echo '<html><body><h1>Accessibility Tests</h1><p>No AI report available.</p></body></html>' > merged-reports/a11y/index.html
-          cp artifacts/regression/ai-report/test-health-report.html merged-reports/regression/index.html 2>/dev/null || \
-            echo '<html><body><h1>Regression Tests</h1><p>No AI report available.</p></body></html>' > merged-reports/regression/index.html
+          
+          cp -r artifacts/smoke/playwright-report/* merged-reports/smoke/index.html 2>/dev/null || \
+            echo '<html><body><h1>Smoke Tests</h1><p>No report available.</p></body></html>' > merged-reports/smoke/index.html
+          cp -r artifacts/api/playwright-report/* merged-reports/api/index.html 2>/dev/null || \
+            echo '<html><body><h1>API Tests</h1><p>No report available.</p></body></html>' > merged-reports/api/index.html
+          cp -r artifacts/a11y/playwright-report/* merged-reports/a11y/index.html 2>/dev/null || \
+            echo '<html><body><h1>Accessibility Tests</h1><p>No report available.</p></body></html>' > merged-reports/a11y/index.html
+          cp -r artifacts/regression/playwright-report/* merged-reports/regression/index.html 2>/dev/null || \
+            echo '<html><body><h1>Regression Tests</h1><p>No report available.</p></body></html>' > merged-reports/regression/index.html
 
       - name: Create index page
         run: |
