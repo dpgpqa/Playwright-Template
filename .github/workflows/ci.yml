@@ -226,7 +226,7 @@ jobs:
 
       - name: Create index page
         run: |
-          cat > merged-reports/index.html << 'EOF'
+          cat > merged-reports/index.html << EOF
           <!DOCTYPE html>
           <html>
           <head>
