@@ -196,11 +196,21 @@ jobs:
       - name: Merge Playwright reports
         run: |
           mkdir -p merged-reports
-          # Find all blob report directories
+          # Merge each suite's report into its own subdirectory
           find artifacts -name "blob-report" -type d | while read dir; do
             echo "Found report: $dir"
-            # Merge each blob report
-            npx playwright merge-reports --reporter=html "$dir" -o merged-reports 2>/dev/null || true
+            # Determine suite from artifact name
+            if [[ "$dir" == *"smoke"* ]]; then
+              npx playwright merge-reports --reporter=html "$dir" -o merged-reports/smoke 2>/dev/null || true
+            elif [[ "$dir" == *"api"* ]]; then
+              npx playwright merge-reports --reporter=html "$dir" -o merged-reports/api 2>/dev/null || true
+            elif [[ "$dir" == *"a11y"* ]]; then
+              npx playwright merge-reports --reporter=html "$dir" -o merged-reports/a11y 2>/dev/null || true
+            elif [[ "$dir" == *"regression"* ]]; then
+              npx playwright merge-reports --reporter=html "$dir" -o merged-reports/regression 2>/dev/null || true
+            else
+              npx playwright merge-reports --reporter=html "$dir" -o merged-reports 2>/dev/null || true
+            fi
           done
           # If no blob reports, try to find HTML reports directly
           if [ ! -d "merged-reports" ] || [ -z "$(ls -A merged-reports)" ]; then
@@ -260,6 +270,9 @@ jobs:
           </body>
           </html>
           EOF
+
+      - name: Add .nojekyll
+        run: touch merged-reports/.nojekyll
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
