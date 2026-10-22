@@ -468,6 +468,21 @@ Test reports are automatically generated on every CI run and available via **Git
 | **Accessibility** | [♿ Open live test report →](https://dpgpqa.github.io/Playwright-Template/a11y/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) |
 | **Regression** | [🔄 Open live test report →](https://dpgpqa.github.io/Playwright-Template/regression/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) |
 
+Reports are powered by **[Playwright AI Reporter](https://github.com/deepakkamboj/playwright-ai-reporter)** — AI-powered failure analysis with fix suggestions, flaky/broken test detection, and rich HTML dashboards.
+
+### AI Provider Setup (optional)
+
+To enable AI-powered failure analysis, add these secrets in **GitHub Settings → Secrets and variables → Actions**:
+
+| Secret | Example | Purpose |
+|--------|---------|---------|
+| `AI_PROVIDER` | `openai`, `anthropic`, `mistral`, `azure` | AI provider to use |
+| `OPENAI_API_KEY` | `sk-...` | OpenAI API key |
+| `ANTHROPIC_API_KEY` | `sk-ant-...` | Anthropic Claude API key |
+| `MISTRAL_API_KEY` | `...` | Mistral AI API key |
+
+Without these secrets, reports are generated normally without AI analysis (`generateFix: false`).
+
 Reports are updated on every push to any branch. The index page shows links to each suite, the latest run info, and commit details.
 
 ---
