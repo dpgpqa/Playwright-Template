@@ -214,6 +214,11 @@ jobs:
           name: regression-test-results
           path: artifacts/regression
 
+      - name: List downloaded artifacts structure
+        run: |
+          echo "=== Artifacts structure ==="
+          find artifacts -type f | sort
+
       - name: Merge Playwright reports
         run: |
           mkdir -p merged-reports/smoke merged-reports/api merged-reports/a11y merged-reports/regression
@@ -303,6 +308,11 @@ jobs:
 
       - name: Add .nojekyll
         run: touch merged-reports/.nojekyll
+
+      - name: List merged reports structure
+        run: |
+          echo "=== Merged reports structure ==="
+          find merged-reports -type f | sort
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
