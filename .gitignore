@@ -43,3 +43,5 @@ coverage/
 *.temp
 tmp/allure-results/
 src/reporters/
+allure-results/
+src/reporters/
