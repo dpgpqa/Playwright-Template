@@ -17,6 +17,7 @@ export default defineConfig({
   reporter: isCI
     ? [
         ['blob', { outputDir: 'blob-report' }],
+        ['html', { outputFolder: 'playwright-report', open: 'never' }],
         ['github'],
         ['json', { outputFile: 'reports/results.json' }],
       ]

@@ -67,6 +67,7 @@ jobs:
           name: smoke-test-results
           path: |
             blob-report/
+            playwright-report/
             reports/
           retention-days: 7
 
@@ -101,6 +102,7 @@ jobs:
           name: api-test-results
           path: |
             blob-report/
+            playwright-report/
             reports/
           retention-days: 7
 
@@ -136,6 +138,7 @@ jobs:
           name: a11y-test-results
           path: |
             blob-report/
+            playwright-report/
             reports/
           retention-days: 7
 
@@ -173,6 +176,7 @@ jobs:
           name: regression-test-results
           path: |
             blob-report/
+            playwright-report/
             reports/
           retention-days: 7
 
@@ -214,47 +218,18 @@ jobs:
           name: regression-test-results
           path: artifacts/regression
 
-      - name: List downloaded artifacts structure
-        run: |
-          echo "=== Artifacts structure ==="
-          find artifacts -type f | sort
-
-      - name: Merge Playwright reports
+      - name: Copy reports to merged-reports
         run: |
           mkdir -p merged-reports/smoke merged-reports/api merged-reports/a11y merged-reports/regression
-          # Merge each suite's blob report into its own subdirectory
-          # merge-reports writes HTML to CWD by default, so we cd into each target
-          if [ -d "artifacts/smoke/blob-report" ]; then
-            echo "Merging smoke report..."
-            (cd merged-reports/smoke && npx playwright merge-reports --reporter=html ../../artifacts/smoke/blob-report)
-          else
-            echo "No smoke blob-report found, creating empty report"
+          # Copy Playwright HTML reports from each suite
+          cp -r artifacts/smoke/playwright-report/* merged-reports/smoke/ 2>/dev/null || \
             echo '<html><body><h1>Smoke Tests</h1><p>No report available.</p></body></html>' > merged-reports/smoke/index.html
-          fi
-
-          if [ -d "artifacts/api/blob-report" ]; then
-            echo "Merging API report..."
-            (cd merged-reports/api && npx playwright merge-reports --reporter=html ../../artifacts/api/blob-report)
-          else
-            echo "No API blob-report found, creating empty report"
+          cp -r artifacts/api/playwright-report/* merged-reports/api/ 2>/dev/null || \
             echo '<html><body><h1>API Tests</h1><p>No report available.</p></body></html>' > merged-reports/api/index.html
-          fi
-
-          if [ -d "artifacts/a11y/blob-report" ]; then
-            echo "Merging a11y report..."
-            (cd merged-reports/a11y && npx playwright merge-reports --reporter=html ../../artifacts/a11y/blob-report)
-          else
-            echo "No a11y blob-report found, creating empty report"
+          cp -r artifacts/a11y/playwright-report/* merged-reports/a11y/ 2>/dev/null || \
             echo '<html><body><h1>Accessibility Tests</h1><p>No report available.</p></body></html>' > merged-reports/a11y/index.html
-          fi
-
-          if [ -d "artifacts/regression/blob-report" ]; then
-            echo "Merging regression report..."
-            (cd merged-reports/regression && npx playwright merge-reports --reporter=html ../../artifacts/regression/blob-report)
-          else
-            echo "No regression blob-report found, creating empty report"
+          cp -r artifacts/regression/playwright-report/* merged-reports/regression/ 2>/dev/null || \
             echo '<html><body><h1>Regression Tests</h1><p>No report available.</p></body></html>' > merged-reports/regression/index.html
-          fi
 
       - name: Create index page
         run: |
@@ -308,11 +283,6 @@ jobs:
 
       - name: Add .nojekyll
         run: touch merged-reports/.nojekyll
-
-      - name: List merged reports structure
-        run: |
-          echo "=== Merged reports structure ==="
-          find merged-reports -type f | sort
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
