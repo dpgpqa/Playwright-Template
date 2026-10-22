@@ -218,9 +218,10 @@ jobs:
         run: |
           mkdir -p merged-reports/smoke merged-reports/api merged-reports/a11y merged-reports/regression
           # Merge each suite's blob report into its own subdirectory
+          # merge-reports writes HTML to CWD by default, so we cd into each target
           if [ -d "artifacts/smoke/blob-report" ]; then
             echo "Merging smoke report..."
-            npx playwright merge-reports --reporter=html --output=merged-reports/smoke artifacts/smoke/blob-report
+            (cd merged-reports/smoke && npx playwright merge-reports --reporter=html ../../artifacts/smoke/blob-report)
           else
             echo "No smoke blob-report found, creating empty report"
             echo '<html><body><h1>Smoke Tests</h1><p>No report available.</p></body></html>' > merged-reports/smoke/index.html
@@ -228,7 +229,7 @@ jobs:
 
           if [ -d "artifacts/api/blob-report" ]; then
             echo "Merging API report..."
-            npx playwright merge-reports --reporter=html --output=merged-reports/api artifacts/api/blob-report
+            (cd merged-reports/api && npx playwright merge-reports --reporter=html ../../artifacts/api/blob-report)
           else
             echo "No API blob-report found, creating empty report"
             echo '<html><body><h1>API Tests</h1><p>No report available.</p></body></html>' > merged-reports/api/index.html
@@ -236,7 +237,7 @@ jobs:
 
           if [ -d "artifacts/a11y/blob-report" ]; then
             echo "Merging a11y report..."
-            npx playwright merge-reports --reporter=html --output=merged-reports/a11y artifacts/a11y/blob-report
+            (cd merged-reports/a11y && npx playwright merge-reports --reporter=html ../../artifacts/a11y/blob-report)
           else
             echo "No a11y blob-report found, creating empty report"
             echo '<html><body><h1>Accessibility Tests</h1><p>No report available.</p></body></html>' > merged-reports/a11y/index.html
@@ -244,7 +245,7 @@ jobs:
 
           if [ -d "artifacts/regression/blob-report" ]; then
             echo "Merging regression report..."
-            npx playwright merge-reports --reporter=html --output=merged-reports/regression artifacts/regression/blob-report
+            (cd merged-reports/regression && npx playwright merge-reports --reporter=html ../../artifacts/regression/blob-report)
           else
             echo "No regression blob-report found, creating empty report"
             echo '<html><body><h1>Regression Tests</h1><p>No report available.</p></body></html>' > merged-reports/regression/index.html
