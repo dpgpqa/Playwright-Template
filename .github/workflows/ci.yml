@@ -180,9 +180,45 @@ jobs:
             reports/
           retention-days: 7
 
+  test-data-driven:
+    name: Data-Driven Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run data-driven tests
+        run: npm run test:data-driven
+        env:
+          BASE_URL: https://automationexercise.com
+
+      - name: Upload data-driven test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-driven-test-results
+          path: |
+            playwright-report/
+            blob-report/
+            reports/
+          retention-days: 7
+
   deploy-reports:
     name: Deploy Reports to GitHub Pages
-    needs: [test-smoke, test-api, test-a11y, test-regression]
+    needs: [test-smoke, test-api, test-a11y, test-regression, test-data-driven]
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -218,6 +254,12 @@ jobs:
           name: regression-test-results
           path: artifacts/regression
 
+      - name: Download data-driven test results
+        uses: actions/download-artifact@v4
+        with:
+          name: data-driven-test-results
+          path: artifacts/data-driven
+
       - name: Setup Java (Required for Allure CLI)
         uses: actions/setup-java@v4
         with:
@@ -229,7 +271,7 @@ jobs:
 
       - name: Copy Playwright HTML reports
         run: |
-          mkdir -p merged-reports/smoke merged-reports/api merged-reports/a11y merged-reports/regression
+          mkdir -p merged-reports/smoke merged-reports/api merged-reports/a11y merged-reports/regression merged-reports/data-driven
           cp -r artifacts/smoke/playwright-report/* merged-reports/smoke/ 2>/dev/null || \
             echo '<html><body><h1>Smoke Tests</h1><p>No report available.</p></body></html>' > merged-reports/smoke/index.html
           cp -r artifacts/api/playwright-report/* merged-reports/api/ 2>/dev/null || \
@@ -238,6 +280,8 @@ jobs:
             echo '<html><body><h1>Accessibility Tests</h1><p>No report available.</p></body></html>' > merged-reports/a11y/index.html
           cp -r artifacts/regression/playwright-report/* merged-reports/regression/ 2>/dev/null || \
             echo '<html><body><h1>Regression Tests</h1><p>No report available.</p></body></html>' > merged-reports/regression/index.html
+          cp -r artifacts/data-driven/playwright-report/* merged-reports/data-driven/ 2>/dev/null || \
+            echo '<html><body><h1>Data-Driven Tests</h1><p>No report available.</p></body></html>' > merged-reports/data-driven/index.html
 
       - name: Create index page
         run: |
@@ -275,6 +319,7 @@ jobs:
                 <a href="./api/index.html">🔌 API Tests</a>
                 <a href="./a11y/index.html">♿ Accessibility Tests</a>
                 <a href="./regression/index.html">🔄 Regression Tests</a>
+                <a href="./data-driven/index.html">📊 Data-Driven Tests</a>
                 <a href="./allure-full/index.html">📊 Dashboard Unificado</a>
               </div>
             </div>

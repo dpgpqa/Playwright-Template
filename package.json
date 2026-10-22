@@ -21,7 +21,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,json,yml,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,json,yml,md}\""
+    "format:check": "prettier --check \"**/*.{ts,json,yml,md}\"",
+    "start:test-server": "npx http-server ./tests/fixtures/static -p 3000 -c-1",
+    "test:data-driven": "playwright test --grep @data-driven --project=chromium",
+    "lighthouse": "lhci autorun --collect.numberOfRuns=3 --assert.assertions.preset=lighthouse:no-pwa || true"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
@@ -32,6 +35,7 @@
     "dotenv": "^16.4.5",
     "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
+    "http-server": "^14.1.1",
     "node-fetch": "^3.3.2",
     "typescript": "^5.6.0",
     "typescript-eslint": "^8.72.0",

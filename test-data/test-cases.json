@@ -1,0 +1,113 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "standard_user",
+      "password": "secret_sauce",
+      "expectedRole": "customer",
+      "shouldLogin": true,
+      "priority": "critical"
+    },
+    {
+      "id": 2,
+      "username": "locked_out_user",
+      "password": "secret_sauce",
+      "expectedRole": null,
+      "shouldLogin": false,
+      "priority": "high"
+    },
+    {
+      "id": 3,
+      "username": "problem_user",
+      "password": "secret_sauce",
+      "expectedRole": "customer",
+      "shouldLogin": true,
+      "priority": "medium"
+    },
+    {
+      "id": 4,
+      "username": "performance_glitch_user",
+      "password": "secret_sauce",
+      "expectedRole": "customer",
+      "shouldLogin": true,
+      "priority": "low"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "Sauce Labs Backpack",
+      "price": 29.99,
+      "expectedInStock": true,
+      "priority": "critical"
+    },
+    {
+      "id": 2,
+      "name": "Sauce Labs Bike Light",
+      "price": 9.99,
+      "expectedInStock": true,
+      "priority": "high"
+    },
+    {
+      "id": 3,
+      "name": "Sauce Labs Bolt T-Shirt",
+      "price": 15.99,
+      "expectedInStock": true,
+      "priority": "medium"
+    },
+    {
+      "id": 4,
+      "name": "Sauce Labs Fleece Jacket",
+      "price": 49.99,
+      "expectedInStock": false,
+      "priority": "low"
+    }
+  ],
+  "testCases": [
+    {
+      "id": "TC-001",
+      "name": "Valid login with standard user",
+      "type": "ui",
+      "tags": ["@smoke", "@critical"],
+      "priority": "critical",
+      "dataUser": "standard_user",
+      "expectedResult": "pass"
+    },
+    {
+      "id": "TC-002",
+      "name": "Locked out user should see error",
+      "type": "ui",
+      "tags": ["@smoke", "@high"],
+      "priority": "high",
+      "dataUser": "locked_out_user",
+      "expectedResult": "fail"
+    },
+    {
+      "id": "TC-003",
+      "name": "Add product to cart",
+      "type": "ui",
+      "tags": ["@regression", "@high"],
+      "priority": "high",
+      "dataProduct": "Sauce Labs Backpack",
+      "expectedResult": "pass"
+    },
+    {
+      "id": "TC-004",
+      "name": "API: Get product list",
+      "type": "api",
+      "tags": ["@api", "@critical"],
+      "priority": "critical",
+      "endpoint": "/productsList",
+      "expectedResult": "pass"
+    },
+    {
+      "id": "TC-005",
+      "name": "API: Get users from DummyJSON",
+      "type": "api",
+      "tags": ["@api", "@medium"],
+      "priority": "medium",
+      "endpoint": "/users",
+      "expectedResult": "pass"
+    }
+  ]
+}

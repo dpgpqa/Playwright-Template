@@ -1,0 +1,32 @@
+# Code owners — auto-assign reviewers per path
+# Format: pattern   @owner
+
+# Default owner for everything
+*   @dpgpqa
+
+# Documentation
+/docs/          @dpgpqa
+README.md       @dpgpqa
+
+# CI/CD workflows
+.github/        @dpgpqa
+
+# Page Objects (critical path)
+src/pages/      @dpgpqa
+src/components/ @dpgpqa
+src/fixtures/   @dpgpqa
+
+# API clients
+src/api/        @dpgpqa
+
+# Tests
+tests/          @dpgpqa
+
+# Configuration
+playwright.config.ts    @dpgpqa
+package.json            @dpgpqa
+tsconfig.json           @dpgpqa
+eslint.config.mjs       @dpgpqa
+
+# Security
+SECURITY.md             @dpgpqa

@@ -1,0 +1,47 @@
+ci:
+  collect:
+    staticDistFile: ./reports/lighthouse/report.html
+    numberOfRuns: 3
+    settings:
+      preset: desktop
+      locale: en-US
+      screenEmulation:
+        mobile: false
+        width: 1366
+        height: 768
+        deviceScaleFactor: 1
+        disabled: false
+
+  assertions:
+    categories:
+      performance:
+        - error:
+            score: < 50
+      accessibility:
+        - error:
+            score: < 50
+      best-practices:
+        - error:
+            score: < 50
+      seo:
+        - error:
+            score: < 50
+    first-contentful-paint: [error, {score: < 3}]
+    largest-contentful-paint: [error, {score: < 4}]
+    cumulative-layout-shift: [error, {score: < 0.1}]
+
+  upload:
+    target: filesystem
+    artifacts:
+      - ./reports/lighthouse/report.html
+
+  server:
+    baseUrl: http://localhost:3000
+    port: 3000
+    command: npm run start:test-server
+    launched: true
+    debug: false
+
+  ci:
+    uploadArtifacts: true
+    temporaryPublicStorage: false
