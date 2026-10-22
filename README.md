@@ -1,6 +1,6 @@
 # Playwright QA Template
 
-[![CI](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml/badge.svg)](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) [![Playwright](https://img.shields.io/badge/Playwright-1.64.1-2EAD33?logo=playwright)](https://playwright.dev/) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml/badge.svg)](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) [![Playwright](https://img.shields.io/badge/Playwright-1.64.1-2EAD33?logo=playwright)](https://playwright.dev/) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Test Reports](https://img.shields.io/badge/Test_Reports-GitHub_Pages-2EAD33?logo=github)](https://dpgpqa.github.io/Playwright-Template/)
 
 Enterprise-grade Playwright template for **UI testing (AutomationExercise)** + **API testing (DummyJSON + AutomationExercise API)**.
 
@@ -453,6 +453,22 @@ Read [`SECURITY.md`](SECURITY.md) for the full policy. Summary:
 - `reports/html` — merged HTML report (merged from shards via `blob-report`)
 - `test-results/` — raw JUnit + trace + screenshots
 - `blob-report/` — sharded blob output for merge
+
+---
+
+## Test Reports
+
+Test reports are automatically deployed to **GitHub Pages** on every CI run:
+
+| Report | URL |
+|--------|-----|
+| **All Reports** | <https://dpgpqa.github.io/Playwright-Template/> |
+| **Smoke Tests** | <https://dpgpqa.github.io/Playwright-Template/smoke/> |
+| **API Tests** | <https://dpgpqa.github.io/Playwright-Template/api/> |
+| **Accessibility** | <https://dpgpqa.github.io/Playwright-Template/a11y/> |
+| **Regression** | <https://dpgpqa.github.io/Playwright-Template/regression/> |
+
+Reports are updated on every push to any branch. The index page shows links to each suite, the latest run info, and commit details.
 
 ---
 
