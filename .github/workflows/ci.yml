@@ -66,7 +66,7 @@ jobs:
         with:
           name: smoke-test-results
           path: |
-            test-results/
+            blob-report/
             reports/
           retention-days: 7
 
@@ -100,7 +100,7 @@ jobs:
         with:
           name: api-test-results
           path: |
-            test-results/
+            blob-report/
             reports/
           retention-days: 7
 
@@ -135,7 +135,7 @@ jobs:
         with:
           name: a11y-test-results
           path: |
-            test-results/
+            blob-report/
             reports/
           retention-days: 7
 
@@ -172,7 +172,7 @@ jobs:
         with:
           name: regression-test-results
           path: |
-            test-results/
+            blob-report/
             reports/
           retention-days: 7
 
@@ -190,38 +190,64 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download all test artifacts
+      - name: Download smoke test results
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
-          merge-multiple: true
+          name: smoke-test-results
+          path: artifacts/smoke
+
+      - name: Download API test results
+        uses: actions/download-artifact@v4
+        with:
+          name: api-test-results
+          path: artifacts/api
+
+      - name: Download a11y test results
+        uses: actions/download-artifact@v4
+        with:
+          name: a11y-test-results
+          path: artifacts/a11y
+
+      - name: Download regression test results
+        uses: actions/download-artifact@v4
+        with:
+          name: regression-test-results
+          path: artifacts/regression
 
       - name: Merge Playwright reports
         run: |
-          mkdir -p merged-reports
-          # Merge each suite's report into its own subdirectory
-          find artifacts -name "blob-report" -type d | while read dir; do
-            echo "Found report: $dir"
-            # Determine suite from artifact name
-            if [[ "$dir" == *"smoke"* ]]; then
-              npx playwright merge-reports --reporter=html "$dir" -o merged-reports/smoke 2>/dev/null || true
-            elif [[ "$dir" == *"api"* ]]; then
-              npx playwright merge-reports --reporter=html "$dir" -o merged-reports/api 2>/dev/null || true
-            elif [[ "$dir" == *"a11y"* ]]; then
-              npx playwright merge-reports --reporter=html "$dir" -o merged-reports/a11y 2>/dev/null || true
-            elif [[ "$dir" == *"regression"* ]]; then
-              npx playwright merge-reports --reporter=html "$dir" -o merged-reports/regression 2>/dev/null || true
-            else
-              npx playwright merge-reports --reporter=html "$dir" -o merged-reports 2>/dev/null || true
-            fi
-          done
-          # If no blob reports, try to find HTML reports directly
-          if [ ! -d "merged-reports" ] || [ -z "$(ls -A merged-reports)" ]; then
-            find artifacts -name "reports" -type d | while read dir; do
-              if [ -d "$dir/html" ]; then
-                cp -r "$dir/html"/* merged-reports/ 2>/dev/null || true
-              fi
-            done
+          mkdir -p merged-reports/smoke merged-reports/api merged-reports/a11y merged-reports/regression
+          # Merge each suite's blob report into its own subdirectory
+          if [ -d "artifacts/smoke/blob-report" ]; then
+            echo "Merging smoke report..."
+            npx playwright merge-reports --reporter=html artifacts/smoke/blob-report -o merged-reports/smoke
+          else
+            echo "No smoke blob-report found, creating empty report"
+            echo '<html><body><h1>Smoke Tests</h1><p>No report available.</p></body></html>' > merged-reports/smoke/index.html
+          fi
+
+          if [ -d "artifacts/api/blob-report" ]; then
+            echo "Merging API report..."
+            npx playwright merge-reports --reporter=html artifacts/api/blob-report -o merged-reports/api
+          else
+            echo "No API blob-report found, creating empty report"
+            echo '<html><body><h1>API Tests</h1><p>No report available.</p></body></html>' > merged-reports/api/index.html
+          fi
+
+          if [ -d "artifacts/a11y/blob-report" ]; then
+            echo "Merging a11y report..."
+            npx playwright merge-reports --reporter=html artifacts/a11y/blob-report -o merged-reports/a11y
+          else
+            echo "No a11y blob-report found, creating empty report"
+            echo '<html><body><h1>Accessibility Tests</h1><p>No report available.</p></body></html>' > merged-reports/a11y/index.html
+          fi
+
+          if [ -d "artifacts/regression/blob-report" ]; then
+            echo "Merging regression report..."
+            npx playwright merge-reports --reporter=html artifacts/regression/blob-report -o merged-reports/regression
+          else
+            echo "No regression blob-report found, creating empty report"
+            echo '<html><body><h1>Regression Tests</h1><p>No report available.</p></body></html>' > merged-reports/regression/index.html
           fi
 
       - name: Create index page
