@@ -66,7 +66,7 @@ jobs:
         with:
           name: smoke-test-results
           path: |
-            allure-results/
+            playwright-report/
             blob-report/
             reports/
           retention-days: 7
@@ -101,7 +101,7 @@ jobs:
         with:
           name: api-test-results
           path: |
-            allure-results/
+            playwright-report/
             blob-report/
             reports/
           retention-days: 7
@@ -137,7 +137,7 @@ jobs:
         with:
           name: a11y-test-results
           path: |
-            allure-results/
+            playwright-report/
             blob-report/
             reports/
           retention-days: 7
@@ -175,7 +175,7 @@ jobs:
         with:
           name: regression-test-results
           path: |
-            allure-results/
+            playwright-report/
             blob-report/
             reports/
           retention-days: 7
@@ -218,42 +218,17 @@ jobs:
           name: regression-test-results
           path: artifacts/regression
 
-      - name: Generate Allure HTML reports
+      - name: Copy Playwright HTML reports
         run: |
           mkdir -p merged-reports/smoke merged-reports/api merged-reports/a11y merged-reports/regression
-          
-          # Generate Allure HTML report for each suite
-          if [ -d "artifacts/smoke/allure-results" ] && [ "$(ls -A artifacts/smoke/allure-results)" ]; then
-            echo "Generating Allure report for smoke..."
-            npx allure generate artifacts/smoke/allure-results -o merged-reports/smoke --clean
-          else
-            echo "No allure results for smoke, creating fallback"
-            echo '<html><body><h1>Smoke Tests</h1><p>No Allure report available.</p></body></html>' > merged-reports/smoke/index.html
-          fi
-
-          if [ -d "artifacts/api/allure-results" ] && [ "$(ls -A artifacts/api/allure-results)" ]; then
-            echo "Generating Allure report for API..."
-            npx allure generate artifacts/api/allure-results -o merged-reports/api --clean
-          else
-            echo "No allure results for API, creating fallback"
-            echo '<html><body><h1>API Tests</h1><p>No Allure report available.</p></body></html>' > merged-reports/api/index.html
-          fi
-
-          if [ -d "artifacts/a11y/allure-results" ] && [ "$(ls -A artifacts/a11y/allure-results)" ]; then
-            echo "Generating Allure report for a11y..."
-            npx allure generate artifacts/a11y/allure-results -o merged-reports/a11y --clean
-          else
-            echo "No allure results for a11y, creating fallback"
-            echo '<html><body><h1>Accessibility Tests</h1><p>No Allure report available.</p></body></html>' > merged-reports/a11y/index.html
-          fi
-
-          if [ -d "artifacts/regression/allure-results" ] && [ "$(ls -A artifacts/regression/allure-results)" ]; then
-            echo "Generating Allure report for regression..."
-            npx allure generate artifacts/regression/allure-results -o merged-reports/regression --clean
-          else
-            echo "No allure results for regression, creating fallback"
-            echo '<html><body><h1>Regression Tests</h1><p>No Allure report available.</p></body></html>' > merged-reports/regression/index.html
-          fi
+          cp -r artifacts/smoke/playwright-report/* merged-reports/smoke/ 2>/dev/null || \
+            echo '<html><body><h1>Smoke Tests</h1><p>No report available.</p></body></html>' > merged-reports/smoke/index.html
+          cp -r artifacts/api/playwright-report/* merged-reports/api/ 2>/dev/null || \
+            echo '<html><body><h1>API Tests</h1><p>No report available.</p></body></html>' > merged-reports/api/index.html
+          cp -r artifacts/a11y/playwright-report/* merged-reports/a11y/ 2>/dev/null || \
+            echo '<html><body><h1>Accessibility Tests</h1><p>No report available.</p></body></html>' > merged-reports/a11y/index.html
+          cp -r artifacts/regression/playwright-report/* merged-reports/regression/ 2>/dev/null || \
+            echo '<html><body><h1>Regression Tests</h1><p>No report available.</p></body></html>' > merged-reports/regression/index.html
 
       - name: Create index page
         run: |

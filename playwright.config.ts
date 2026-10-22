@@ -17,7 +17,7 @@ export default defineConfig({
   reporter: isCI
     ? [
         ['blob', { outputDir: 'blob-report' }],
-        ['allure-playwright', { outputFolder: 'allure-results', detail: true, suiteTitle: true }],
+        ['html', { outputFolder: 'playwright-report', open: 'never' }],
         ['github'],
         ['json', { outputFile: 'reports/results.json' }],
       ]
