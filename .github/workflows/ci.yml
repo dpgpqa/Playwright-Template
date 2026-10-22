@@ -50,9 +50,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install allure-commandline
-        run: npm install -g allure-commandline --save-dev
-
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
@@ -62,7 +59,6 @@ jobs:
           BASE_URL: https://automationexercise.com
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
-          ALLURE_RESULTS_DIR: allure-results-smoke
 
       - name: Upload smoke test results
         if: always()
@@ -70,7 +66,7 @@ jobs:
         with:
           name: smoke-test-results
           path: |
-            allure-results-smoke/
+            playwright-report/
             blob-report/
             reports/
           retention-days: 7
@@ -92,16 +88,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install allure-commandline
-        run: npm install -g allure-commandline --save-dev
-
       - name: Run API tests
         run: npm run test:api
         env:
           DUMMYJSON_BASE_URL: https://dummyjson.com
           DUMMYJSON_USERNAME: ${{ secrets.DUMMYJSON_USERNAME }}
           DUMMYJSON_PASSWORD: ${{ secrets.DUMMYJSON_PASSWORD }}
-          ALLURE_RESULTS_DIR: allure-results-api
 
       - name: Upload API test results
         if: always()
@@ -109,7 +101,7 @@ jobs:
         with:
           name: api-test-results
           path: |
-            allure-results-api/
+            playwright-report/
             blob-report/
             reports/
           retention-days: 7
@@ -131,9 +123,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install allure-commandline
-        run: npm install -g allure-commandline --save-dev
-
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
@@ -141,7 +130,6 @@ jobs:
         run: npm run test:a11y
         env:
           BASE_URL: https://automationexercise.com
-          ALLURE_RESULTS_DIR: allure-results-a11y
 
       - name: Upload a11y test results
         if: always()
@@ -149,7 +137,7 @@ jobs:
         with:
           name: a11y-test-results
           path: |
-            allure-results-a11y/
+            playwright-report/
             blob-report/
             reports/
           retention-days: 7
@@ -171,9 +159,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install allure-commandline
-        run: npm install -g allure-commandline --save-dev
-
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium firefox webkit
 
@@ -183,7 +168,6 @@ jobs:
           BASE_URL: https://automationexercise.com
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
-          ALLURE_RESULTS_DIR: allure-results-regression
 
       - name: Upload regression test results
         if: always()
@@ -191,7 +175,7 @@ jobs:
         with:
           name: regression-test-results
           path: |
-            allure-results-regression/
+            playwright-report/
             blob-report/
             reports/
           retention-days: 7
@@ -234,45 +218,17 @@ jobs:
           name: regression-test-results
           path: artifacts/regression
 
-      - name: Install allure-commandline
-        run: npm install -g allure-commandline --save-dev
-
-      - name: Generate Allure HTML reports
+      - name: Copy Playwright HTML reports
         run: |
           mkdir -p merged-reports/smoke merged-reports/api merged-reports/a11y merged-reports/regression
-          
-          # Generate Allure HTML report for each suite
-          if [ -d "artifacts/smoke/allure-results-smoke" ] && [ "$(ls -A artifacts/smoke/allure-results-smoke)" ]; then
-            echo "Generating Allure report for smoke..."
-            allure generate artifacts/smoke/allure-results-smoke -o merged-reports/smoke --clean
-          else
-            echo "No allure results for smoke, creating fallback"
-            echo '<html><body><h1>Smoke Tests</h1><p>No Allure report available.</p></body></html>' > merged-reports/smoke/index.html
-          fi
-
-          if [ -d "artifacts/api/allure-results-api" ] && [ "$(ls -A artifacts/api/allure-results-api)" ]; then
-            echo "Generating Allure report for API..."
-            allure generate artifacts/api/allure-results-api -o merged-reports/api --clean
-          else
-            echo "No allure results for API, creating fallback"
-            echo '<html><body><h1>API Tests</h1><p>No Allure report available.</p></body></html>' > merged-reports/api/index.html
-          fi
-
-          if [ -d "artifacts/a11y/allure-results-a11y" ] && [ "$(ls -A artifacts/a11y/allure-results-a11y)" ]; then
-            echo "Generating Allure report for a11y..."
-            allure generate artifacts/a11y/allure-results-a11y -o merged-reports/a11y --clean
-          else
-            echo "No allure results for a11y, creating fallback"
-            echo '<html><body><h1>Accessibility Tests</h1><p>No Allure report available.</p></body></html>' > merged-reports/a11y/index.html
-          fi
-
-          if [ -d "artifacts/regression/allure-results-regression" ] && [ "$(ls -A artifacts/regression/allure-results-regression)" ]; then
-            echo "Generating Allure report for regression..."
-            allure generate artifacts/regression/allure-results-regression -o merged-reports/regression --clean
-          else
-            echo "No allure results for regression, creating fallback"
-            echo '<html><body><h1>Regression Tests</h1><p>No Allure report available.</p></body></html>' > merged-reports/regression/index.html
-          fi
+          cp -r artifacts/smoke/playwright-report/* merged-reports/smoke/ 2>/dev/null || \
+            echo '<html><body><h1>Smoke Tests</h1><p>No report available.</p></body></html>' > merged-reports/smoke/index.html
+          cp -r artifacts/api/playwright-report/* merged-reports/api/ 2>/dev/null || \
+            echo '<html><body><h1>API Tests</h1><p>No report available.</p></body></html>' > merged-reports/api/index.html
+          cp -r artifacts/a11y/playwright-report/* merged-reports/a11y/ 2>/dev/null || \
+            echo '<html><body><h1>Accessibility Tests</h1><p>No report available.</p></body></html>' > merged-reports/a11y/index.html
+          cp -r artifacts/regression/playwright-report/* merged-reports/regression/ 2>/dev/null || \
+            echo '<html><body><h1>Regression Tests</h1><p>No report available.</p></body></html>' > merged-reports/regression/index.html
 
       - name: Create index page
         run: |
