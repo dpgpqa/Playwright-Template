@@ -41,4 +41,5 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
-tmp/
+tmp/allure-results/
+src/reporters/

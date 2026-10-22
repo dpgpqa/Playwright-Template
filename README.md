@@ -468,7 +468,7 @@ Test reports are automatically generated on every CI run and available via **Git
 | **Accessibility** | [♿ Open live test report →](https://dpgpqa.github.io/Playwright-Template/a11y/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) |
 | **Regression** | [🔄 Open live test report →](https://dpgpqa.github.io/Playwright-Template/regression/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) |
 
-Reports are generated using **[Allure Report](https://allurereport.org/)** and updated on every push to any branch. The index page shows links to each suite, the latest run info, and commit details.
+Reports are generated using Playwright's built-in HTML reporter and updated on every push to any branch. The index page shows links to each suite, the latest run info, and commit details.
 
 ---
 
