@@ -66,7 +66,7 @@ jobs:
         with:
           name: smoke-test-results
           path: |
-            allure-results/
+            playwright-report/
             blob-report/
             reports/
           retention-days: 7
@@ -101,7 +101,7 @@ jobs:
         with:
           name: api-test-results
           path: |
-            allure-results/
+            playwright-report/
             blob-report/
             reports/
           retention-days: 7
@@ -137,7 +137,7 @@ jobs:
         with:
           name: a11y-test-results
           path: |
-            allure-results/
+            playwright-report/
             blob-report/
             reports/
           retention-days: 7
@@ -175,7 +175,7 @@ jobs:
         with:
           name: regression-test-results
           path: |
-            allure-results/
+            playwright-report/
             blob-report/
             reports/
           retention-days: 7
@@ -227,37 +227,17 @@ jobs:
       - name: Install allure-commandline
         run: npm install --no-save allure-commandline
 
-      - name: Generar Allure Reports (Smoke, API, a11y, Regression + Unificado)
-        timeout-minutes: 5
+      - name: Copy Playwright HTML reports
         run: |
-          mkdir -p merged-reports
-          ALL_SOURCES=""
-
-          for suite in smoke api a11y regression; do
-            if [ -d "artifacts/$suite/allure-results" ]; then
-              SRC="artifacts/$suite/allure-results"
-            elif [ -d "artifacts/$suite" ]; then
-              SRC="artifacts/$suite"
-            else
-              echo "⚠️ No se encontraron resultados para $suite, saltando..."
-              continue
-            fi
-
-            # Verificar que existan archivos JSON antes de invocar a Allure
-            if ls "$SRC"/*.json 1> /dev/null 2>&1; then
-              echo "✅ Generando reporte Allure individual para $suite desde$SRC..."
-              ./node_modules/.bin/allure generate "$SRC" -o "merged-reports/$suite" --clean
-              ALL_SOURCES="$ALL_SOURCES$SRC"
-            else
-              echo "⚠️ Directorio $SRC sin archivos JSON para$suite"
-            fi
-          done
-
-          # Opcional: Generar también un Dashboard maestro unificado con las 4 suites juntas
-          if [ -n "$ALL_SOURCES" ]; then
-            echo "📊 Generando Dashboard Allure Unificado..."
-            ./node_modules/.bin/allure generate $ALL_SOURCES -o "merged-reports/allure-full" --clean
-          fi
+          mkdir -p merged-reports/smoke merged-reports/api merged-reports/a11y merged-reports/regression
+          cp -r artifacts/smoke/playwright-report/* merged-reports/smoke/ 2>/dev/null || \
+            echo '<html><body><h1>Smoke Tests</h1><p>No report available.</p></body></html>' > merged-reports/smoke/index.html
+          cp -r artifacts/api/playwright-report/* merged-reports/api/ 2>/dev/null || \
+            echo '<html><body><h1>API Tests</h1><p>No report available.</p></body></html>' > merged-reports/api/index.html
+          cp -r artifacts/a11y/playwright-report/* merged-reports/a11y/ 2>/dev/null || \
+            echo '<html><body><h1>Accessibility Tests</h1><p>No report available.</p></body></html>' > merged-reports/a11y/index.html
+          cp -r artifacts/regression/playwright-report/* merged-reports/regression/ 2>/dev/null || \
+            echo '<html><body><h1>Regression Tests</h1><p>No report available.</p></body></html>' > merged-reports/regression/index.html
 
       - name: Create index page
         run: |
