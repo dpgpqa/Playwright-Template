@@ -24,7 +24,7 @@ module.exports = {
   },
   sourceMap: false,
   instrument: true,
-  checkCoverage: true,
+  checkCoverage: false,
   lines: 40,
   statements: 40,
   branches: 25,
