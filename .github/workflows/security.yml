@@ -44,8 +44,6 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITLEAKS_LICENSE_KEY: ${{ secrets.GITLEAKS_LICENSE_KEY }}
-        with:
-          config: .gitleaks.toml
 
   dependency-review:
     name: Dependency Review
