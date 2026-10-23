@@ -231,35 +231,35 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download smoke test results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: smoke-test-results
           path: artifacts/smoke
         continue-on-error: true
 
       - name: Download API test results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: api-test-results
           path: artifacts/api
         continue-on-error: true
 
       - name: Download a11y test results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: a11y-test-results
           path: artifacts/a11y
         continue-on-error: true
 
       - name: Download regression test results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: regression-test-results
           path: artifacts/regression
         continue-on-error: true
 
       - name: Download data-driven test results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: data-driven-test-results
           path: artifacts/data-driven
