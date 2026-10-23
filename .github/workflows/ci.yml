@@ -306,7 +306,7 @@ jobs:
 
   deploy-reports:
     name: Deploy Reports to GitHub Pages
-    needs: [test-smoke, test-api, test-a11y, test-regression, test-data-driven]
+    needs: [test-smoke, test-api, test-a11y, test-regression, test-data-driven, zap-baseline-scan]
     if: always()
     runs-on: ubuntu-latest
     permissions:
@@ -354,6 +354,13 @@ jobs:
           path: artifacts/data-driven
         continue-on-error: true
 
+      - name: Download ZAP report
+        uses: actions/download-artifact@v4
+        with:
+          name: zap-report-pages
+          path: artifacts/zap
+        continue-on-error: true
+
       - name: Setup Java (Required for Allure CLI)
         uses: actions/setup-java@v4
         with:
@@ -376,6 +383,8 @@ jobs:
             echo '<html><body><h1>Regression Tests</h1><p>No report available.</p></body></html>' > merged-reports/regression/index.html
           cp -r artifacts/data-driven/playwright-report/* merged-reports/data-driven/ 2>/dev/null || \
             echo '<html><body><h1>Data-Driven Tests</h1><p>No report available.</p></body></html>' > merged-reports/data-driven/index.html
+          cp -r artifacts/zap/* merged-reports/security/ 2>/dev/null || \
+            echo '<html><body><h1>ZAP DAST Security Scan</h1><p>No report available.</p></body></html>' > merged-reports/security/index.html
 
       - name: Create index page
         run: |
@@ -414,6 +423,7 @@ jobs:
                 <a href="./a11y/index.html">♿ Accessibility Tests</a>
                 <a href="./regression/index.html">🔄 Regression Tests</a>
                 <a href="./data-driven/index.html">📊 Data-Driven Tests</a>
+                <a href="./security/index.html">🛡️ Security (ZAP)</a>
                 <a href="./allure-full/index.html">📊 Dashboard Unificado</a>
               </div>
             </div>
