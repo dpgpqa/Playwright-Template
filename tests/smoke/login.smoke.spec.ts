@@ -7,42 +7,43 @@ import { Header } from '@components/Header';
 
 const skipInCI = process.env.CI === 'true';
 
-// Skipped in CI - AutomationExercise is an external demo site with
-// Cloudflare bot protection and inconsistent response times in CI runners.
-if (!skipInCI) {
-  test.describe('Smoke: Critical user flows @smoke', () => {
-    test('homepage loads and shows products link @smoke', async ({ page }) => {
-      const home = new HomePage(page);
-      await home.goto();
-      await expect(page).toHaveTitle(/Automation Exercise/);
-      await expect(home.getProductsLink()).toBeVisible();
-    });
-
-    test('login page loads and shows form @smoke', async ({ loginPage }) => {
-      await loginPage.goto();
-      await expect(loginPage.getPage().locator('.login-form h2')).toBeVisible();
-    });
-
-    test('invalid login shows error @smoke', async ({ loginPage, freshContextPage }) => {
-      const login = new LoginPage(freshContextPage);
-      await login.goto();
-      await login.login('invalid@example.com', 'wrongpass');
-      await expect(freshContextPage.getByText('Your email or password is incorrect!')).toBeVisible();
-    });
-
-    test('products page loads and shows items @smoke', async ({ productsPage }) => {
-      await productsPage.goto();
-      const count = await productsPage.getProductCount();
-      expect(count).toBeGreaterThan(0);
-    });
-
-    test('add to cart from products page @smoke', async ({ productsPage, cartPage, header }) => {
-      await productsPage.goto();
-      await productsPage.addToCartByIndex(0);
-      await header.goToCart();
-      await expect(cartPage.getCartTable()).toBeVisible();
-      const items = await cartPage.getItemCount();
-      expect(items).toBeGreaterThanOrEqual(1);
-    });
+test.describe('Smoke: Critical user flows @smoke', () => {
+  test('homepage loads and shows products link @smoke', async ({ page }) => {
+    if (skipInCI) test.skip();
+    const home = new HomePage(page);
+    await home.goto();
+    await expect(page).toHaveTitle(/Automation Exercise/);
+    await expect(home.getProductsLink()).toBeVisible();
   });
-}
+
+  test('login page loads and shows form @smoke', async ({ loginPage }) => {
+    if (skipInCI) test.skip();
+    await loginPage.goto();
+    await expect(loginPage.getPage().locator('.login-form h2')).toBeVisible();
+  });
+
+  test('invalid login shows error @smoke', async ({ loginPage, freshContextPage }) => {
+    if (skipInCI) test.skip();
+    const login = new LoginPage(freshContextPage);
+    await login.goto();
+    await login.login('invalid@example.com', 'wrongpass');
+    await expect(freshContextPage.getByText('Your email or password is incorrect!')).toBeVisible();
+  });
+
+  test('products page loads and shows items @smoke', async ({ productsPage }) => {
+    if (skipInCI) test.skip();
+    await productsPage.goto();
+    const count = await productsPage.getProductCount();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('add to cart from products page @smoke', async ({ productsPage, cartPage, header }) => {
+    if (skipInCI) test.skip();
+    await productsPage.goto();
+    await productsPage.addToCartByIndex(0);
+    await header.goToCart();
+    await expect(cartPage.getCartTable()).toBeVisible();
+    const items = await cartPage.getItemCount();
+    expect(items).toBeGreaterThanOrEqual(1);
+  });
+});
