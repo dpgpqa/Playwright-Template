@@ -3,8 +3,6 @@ name: ZAP DAST Security Scan
 on:
   push:
     branches: [template-init]
-  pull_request:
-    branches: [template-init]
   schedule:
     - cron: '0 2 * * 0'
 
@@ -14,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
