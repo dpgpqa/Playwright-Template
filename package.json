@@ -26,12 +26,12 @@
     "test:data-driven": "playwright test --grep @data-driven --project=chromium",
     "lighthouse": "lhci autorun --collect.numberOfRuns=3 --assert.assertions.preset=lighthouse:no-pwa || true",
     "test:quarantine": "playwright test --grep @quarantine --project=chromium",
-    "test:coverage": "nyc playwright test --reporter=html && nyc report --reporter=html --reporter=text --reporter=cobertura",
-    "test:coverage:ci": "nyc playwright test --reporter=dot && nyc report --reporter=text --reporter=cobertura",
+    "test:coverage": "nyc playwright test --grep @visual --invert --project=chromium --reporter=html && nyc report --reporter=html --reporter=text --reporter=cobertura",
+    "test:coverage:ci": "nyc playwright test --grep @visual --invert --project=chromium --reporter=dot && nyc report --reporter=text --reporter=cobertura",
     "env:dev": "cp config/environments/.env.development .env.local",
     "env:staging": "cp config/environments/.env.staging .env.local",
     "env:prod": "cp config/environments/.env.production .env.local",
-    "zap:baseline": "npx zaproxy-baseline -t https://automationexercise.com -g gen.conf || true"
+    "zap:baseline": "zap-baseline.py -t https://automationexercise.com -r zap-report.html -j zap-report.json -g .zap/rules.tsv -a || true"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
