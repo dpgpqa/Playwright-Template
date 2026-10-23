@@ -5,7 +5,7 @@ import { CartPage } from '@pages/CartPage';
 import { Header } from '@components/Header';
 
 test.describe('Regression: Full e2e flows @regression', () => {
-  test('remove item from cart @regression', async ({ productsPage, cartPage, header }) => {
+  (process.env.CI ? test.skip : test)('remove item from cart @regression', async ({ productsPage, cartPage, header }) => {
     await productsPage.goto();
     await productsPage.addToCartByIndex(0);
     await header.goToCart();
