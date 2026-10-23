@@ -2,57 +2,26 @@
   id = "generic-api-key"
   name = "Generic API Key"
   description = "Detects generic API keys"
-  regex = '(?i)(?:api[_-]?key|apikey)\s*[:=]\s*["\']?([0-9a-zA-Z]{16,})["\']?'
-  secretGroup = 1
-
-[[rules]]
-  id = "generic-secret"
-  name = "Generic Secret"
-  description = "Detects generic secrets"
-  regex = '(?i)(?:secret|token|password|passwd|pwd)\s*[:=]\s*["\']?([0-9a-zA-Z]{16,})["\']?'
+  regex = "(?i)(?:api[_-]?key|apikey)\s*[:=]\s*[\"']?([0-9a-zA-Z]{16,})[\"']?"
   secretGroup = 1
 
 [[rules]]
   id = "aws-access-key"
   name = "AWS Access Key"
   description = "Detects AWS access keys"
-  regex = 'AKIA[0-9A-Z]{16}'
+  regex = "AKIA[0-9A-Z]{16}"
   secretGroup = 0
 
 [[rules]]
   id = "github-token"
   name = "GitHub Token"
   description = "Detects GitHub personal access tokens"
-  regex = 'ghp_[0-9a-zA-Z]{36}'
-  secretGroup = 0
-
-[[rules]]
-  id = "slack-token"
-  name = "Slack Token"
-  description = "Detects Slack tokens"
-  regex = 'xox[bapr]-[0-9a-zA-Z]{10,48}'
+  regex = "ghp_[0-9a-zA-Z]{36}"
   secretGroup = 0
 
 [[rules]]
   id = "private-key"
   name = "Private Key"
   description = "Detects private keys"
-  regex = '-----BEGIN [A-Z ]*PRIVATE KEY-----'
+  regex = "-----BEGIN [A-Z ]*PRIVATE KEY-----"
   secretGroup = 0
-
-[[rules]]
-  id = "env-var"
-  name = "Environment Variable Assignment"
-  description = "Detects potential env var assignments with secrets"
-  regex = '(?i)(?:api[_-]?key|secret|token|password|passwd|pwd)\s*=\s*["\']?[0-9a-zA-Z]{16,}'
-  secretGroup = 0
-
-[[allowlist]]
-  id = "generic-api-key"
-  description = "Allow example/placeholder values"
-  regex = 'example|test|placeholder|your-api-key-here|sk-test|pk_test'
-
-[[allowlist]]
-  id = "generic-secret"
-  description = "Allow example/placeholder values"
-  regex = 'example|test|placeholder|your-secret-here'
