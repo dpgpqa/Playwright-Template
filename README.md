@@ -53,6 +53,7 @@ The template ships **pre-wired against [automationexercise.com](https://automati
 | Performance | [Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci) | Free / OSS |
 | Static analysis | TypeScript + ESLint | Free / OSS |
 | Dependency review | GitHub Dependabot | Free on GitHub |
+| Secret scanning | Gitleaks via security.yml | Free on GitHub |
 | Pre-commit gates | husky 9 + lint-staged 17 | Free / OSS |
 | CI/CD | GitHub Actions | Free tier |
 
@@ -121,6 +122,7 @@ You should see 5 smoke tests pass against automationexercise. Full suite (`npm t
 │   ├── smoke/                    @smoke — critical path (< 2 min total)
 │   ├── regression/               @regression — full coverage, nightly
 │   ├── api/                      @api — contract + availability
+│   ├── data-driven/              @data-driven — JSON-driven test cases with priority tags
 │   ├── accessibility/            @a11y — axe-core WCAG 2.1 AA
 │   └── visual/                   @visual — screenshot diffs
 │
@@ -351,6 +353,7 @@ const payment = createPaymentData();    // { nameOnCard, cardNumber, cvc, ... }
 | `@smoke` | Critical happy-path (< 2 min) | Every push, PR |
 | `@regression` | Full coverage | Nightly, on-demand |
 | `@api` | Contract + availability | Every push |
+| `@data-driven` | JSON-driven test cases with priority levels | Every push |
 | `@a11y` | axe-core WCAG 2.1 AA | Every push |
 | `@visual` | Screenshot diffs | On-demand / PR |
 
@@ -362,7 +365,8 @@ const payment = createPaymentData();    // { nameOnCard, cardNumber, cvc, ... }
 # Run suites
 npx playwright test --grep @smoke --project=chromium
 npx playwright test --grep @regression
-npx playwright test --grep @api --project=chromium
+npx playwright test tests/api/ --project=chromium
+npx playwright test --grep @data-driven --project=chromium
 npx playwright test --grep @a11y --project=chromium
 npx playwright test --grep @visual
 
@@ -445,8 +449,9 @@ Read [`SECURITY.md`](SECURITY.md) for the full policy. Summary:
 
 | Workflow | Trigger | Jobs |
 |----------|---------|------|
-| `ci.yml` | push, PR to `template-init` | lint-and-typecheck, test-smoke, test-api, test-a11y, test-regression |
-| `security.yml` | schedule, push | CodeQL, gitleaks, dependency review |
+| `ci.yml` | push, PR to `template-init` | lint-and-typecheck, test-smoke, test-api, test-data-driven, test-a11y, test-regression, deploy-reports |
+| `security.yml` | push, PR, schedule | CodeQL, gitleaks (secret scanning), dependency review (PR only) |
+| `lighthouse.yml` | push, PR | Performance, accessibility, SEO budgets |
 
 ### Artifacts
 
@@ -465,6 +470,7 @@ Test reports are automatically generated on every CI run and available via **Git
 | **All Reports** | [📊 Open live test report →](https://dpgpqa.github.io/Playwright-Template/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) |
 | **Smoke Tests** | [💨 Open live test report →](https://dpgpqa.github.io/Playwright-Template/smoke/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) |
 | **API Tests** | [🔌 Open live test report →](https://dpgpqa.github.io/Playwright-Template/api/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) |
+| **Data-Driven Tests** | [📊 Open live test report →](https://dpgpqa.github.io/Playwright-Template/data-driven/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) |
 | **Accessibility** | [♿ Open live test report →](https://dpgpqa.github.io/Playwright-Template/a11y/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) |
 | **Regression** | [🔄 Open live test report →](https://dpgpqa.github.io/Playwright-Template/regression/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) |
 
@@ -503,6 +509,7 @@ npm test              # All tests
 npm run test:smoke    # @smoke only (chromium)
 npm run test:regression
 npm run test:api
+npm run test:data-driven
 npm run test:a11y
 npm run test:visual
 npm run test:visual:update  # Regenerate snapshots
@@ -553,6 +560,7 @@ npx lint-staged
 | Test data | Update `test-data/*.json` + zod schemas in `src/api/*.ts` |
 | Factories | Update `src/factories/*.ts` |
 | Performance thresholds | `lighthouserc.yml` |
+| Secret scanning rules | `.gitleaks.toml` (default rules if absent) |
 | CI secrets | GitHub Settings → Secrets and variables → Actions |
 | Code owners | `.github/CODEOWNERS` |
 
