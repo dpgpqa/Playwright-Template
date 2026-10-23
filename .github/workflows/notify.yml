@@ -11,12 +11,18 @@ jobs:
     name: Notify on CI Failure
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'failure'
+    permissions:
+      contents: read
+      issues: write
     steps:
       - name: Get failed jobs
         id: failed-jobs
         run: |
           FAILED_JOBS=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/jobs --jq '.jobs[] | select(.conclusion=="failure") | .name' | tr '\n' ', ')
           echo "failed_jobs=$FAILED_JOBS" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          echo "commit_sha=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
+          echo "run_url=${{ github.event.workflow_run.html_url }}" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -25,7 +31,7 @@ jobs:
         run: |
           gh issue create \
             --title "🚨 CI Failure: ${{ steps.failed-jobs.outputs.branch }}" \
-            --body "## CI Pipeline Failed\n\n**Branch:** ${{ steps.failed-jobs.outputs.branch }}\n**Failed jobs:** ${{ steps.failed-jobs.outputs.failed_jobs }}\n**Run:** ${{ steps.failed-jobs.outputs.run_url }}" \
+            --body "## CI Pipeline Failed\n\n**Branch:** ${{ steps.failed-jobs.outputs.branch }}\n**Commit:** ${{ steps.failed-jobs.outputs.commit_sha }}\n**Failed jobs:** ${{ steps.failed-jobs.outputs.failed_jobs }}\n**Run:** ${{ steps.failed-jobs.outputs.run_url }}" \
             --label "ci-failure,priority-high,automated"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
