@@ -253,7 +253,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run tests with coverage
-        run: npx nyc playwright test --grep @visual --invert --project=chromium --reporter=dot && npx nyc report --reporter=text --reporter=cobertura
+        run: npx nyc playwright test --grepInvert @visual --project=chromium --reporter=dot && npx nyc report --reporter=text --reporter=cobertura
         env:
           BASE_URL: https://automationexercise.com
 
