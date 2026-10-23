@@ -1,0 +1,24 @@
+# ZAP Baseline Scan Rules
+# Format: ruleId,enabled,threshold
+# threshold: 0 = ignore, 1 = warn, 2 = fail
+#
+# Disable passive scan rules that commonly produce false positives on demo sites
+10010,1,0   # Cookie without SameSite attribute
+10011,1,0   # Cookie without Secure attribute
+10015,1,0   # Incomplete or No Cache-control header
+10019,1,0   # X-Content-Type-Options header missing
+10038,1,0   # Content Security Policy header not set
+10054,1,0   # X-Frame-Options header missing
+10045,1,0   # Content-Type header missing
+
+# Enable critical rules
+40012,1,2   # SQL Injection
+40014,1,2   # SQL Injection - MySQL
+40018,1,2   # SQL Injection - Hypersonic SQL
+40019,1,2   # SQL Injection - PostgreSQL
+40020,1,2   # SQL Injection - SQLite
+90020,1,2   # Path Traversal
+90022,1,2   # Remote File Inclusion
+90028,1,2   # Cross Site Scripting (Reflected)
+90029,1,2   # Cross Site Scripting (Persistent)
+90032,1,2   # Heartbleed
