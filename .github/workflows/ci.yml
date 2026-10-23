@@ -357,7 +357,7 @@ jobs:
       - name: Download ZAP report
         uses: actions/download-artifact@v4
         with:
-          name: zap-report-pages
+          name: zap-security-report
           path: artifacts/zap
         continue-on-error: true
 

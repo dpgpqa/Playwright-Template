@@ -12,46 +12,35 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      issues: write
       actions: read
     continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.4.0
-        with:
-          target: 'https://automationexercise.com'
-          docker_name: 'ghcr.io/zaproxy/zaproxy:stable'
-          cmd_options: '-a -I'
-          allow_issue_writing: false
-          fail_action: false
-
-      - name: Upload ZAP results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-report
-          path: |
-            zap-report.html
-            zap-report.json
-            zap-report.md
-            zap-out.log
-          retention-days: 7
-
-      - name: Copy ZAP report to merged-reports
-        if: always()
+      - name: Run OWASP ZAP Baseline Scan
         run: |
-          mkdir -p merged-reports/security
-          cp zap-report.html merged-reports/security/zap-report.html 2>/dev/null || true
-          cp zap-report.json merged-reports/security/zap-report.json 2>/dev/null || true
-          cp zap-report.md merged-reports/security/zap-report.md 2>/dev/null || true
+          chmod 777 ${{ github.workspace }}
+          docker run --rm --user root \
+            -v ${{ github.workspace }}:/zap/wrk/:rw \
+            --network=host \
+            -t ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t https://automationexercise.com \
+            -J report_json.json \
+            -w report_md.md \
+            -r report_html.html \
+            -a -I
+          # Asegurar que el runner sea dueño de los reportes generados por root en Docker
+          sudo -S -p '' chown -R $USER:$USER report_json.json report_md.md report_html.html || true
 
-      - name: Upload ZAP report artifact for Pages
+      - name: Upload ZAP Security Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zap-report-pages
-          path: merged-reports/security/
-          retention-days: 7
+          name: zap-security-report
+          path: |
+            report_html.html
+            report_md.md
+            report_json.json
+          retention-days: 14
