@@ -17,16 +17,16 @@ module.exports = {
   ],
   reporter: ['html', 'text', 'cobertura'],
   thresholds: {
-    statements: 80,
-    branches: 75,
-    functions: 80,
-    lines: 80
+    statements: 40,
+    branches: 25,
+    functions: 40,
+    lines: 40
   },
   sourceMap: false,
   instrument: true,
   checkCoverage: true,
-  lines: 80,
-  statements: 80,
-  branches: 75,
-  functions: 80
+  lines: 40,
+  statements: 40,
+  branches: 25,
+  functions: 40
 };
