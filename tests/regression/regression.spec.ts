@@ -6,18 +6,21 @@ import { Header } from '@components/Header';
 
 const skipInCI = process.env.CI === 'true';
 
-test.describe('Regression: Full e2e flows @regression', () => {
-  test('remove item from cart @regression', async ({ productsPage, cartPage, header }) => {
-    if (skipInCI) test.skip();
-    await productsPage.goto();
-    await productsPage.addToCartByIndex(0);
-    await header.goToCart();
+// Skipped in CI - AutomationExercise is an external demo site with Cloudflare
+// bot protection and inconsistent response times in CI runners.
+if (!skipInCI) {
+  test.describe('Regression: Full e2e flows @regression', () => {
+    test('remove item from cart @regression', async ({ productsPage, cartPage, header }) => {
+      await productsPage.goto();
+      await productsPage.addToCartByIndex(0);
+      await header.goToCart();
 
-    const before = await cartPage.getItemCount();
-    expect(before).toBeGreaterThan(0);
+      const before = await cartPage.getItemCount();
+      expect(before).toBeGreaterThan(0);
 
-    await cartPage.removeItemByIndex(0);
-    const after = await cartPage.getItemCount();
-    expect(after).toBe(before - 1);
+      await cartPage.removeItemByIndex(0);
+      const after = await cartPage.getItemCount();
+      expect(after).toBe(before - 1);
+    });
   });
-});
+}
