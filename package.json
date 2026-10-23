@@ -10,7 +10,7 @@
     "test": "playwright test",
     "test:smoke": "playwright test --grep @smoke --project=chromium",
     "test:regression": "playwright test --grep @regression",
-    "test:api": "playwright test --grep @api --project=chromium",
+    "test:api": "playwright test tests/api/ --project=chromium",
     "test:a11y": "playwright test --grep @a11y --project=chromium",
     "test:visual": "playwright test --grep @visual",
     "test:visual:update": "playwright test --grep @visual --project=chromium --update-snapshots",
