@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [template-init]
   schedule:
-    - cron: '0 2 * * 0'  # Weekly on Sunday at 2 AM
+    - cron: '0 2 * * 0'
 
 jobs:
   zap-baseline-scan:
@@ -14,8 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write
-      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,9 +35,3 @@ jobs:
             zap-report.html
             zap-out.log
           retention-days: 7
-
-      - name: Fail on high alerts
-        if: failure()
-        run: |
-          echo "⚠️ ZAP baseline scan detected potential security issues. Review the zap-report.html artifact."
-          exit 0
