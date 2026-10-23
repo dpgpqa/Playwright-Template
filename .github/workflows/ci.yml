@@ -126,10 +126,26 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Start test server
+        run: npm run start:test-server &
+        env:
+          PORT: 3000
+
+      - name: Wait for server to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if curl -s http://localhost:3000 > /dev/null 2>&1; then
+              echo "Server is ready"
+              break
+            fi
+            echo "Waiting for server... ($i/30)"
+            sleep 2
+          done
+
       - name: Run accessibility tests
         run: npm run test:a11y
         env:
-          BASE_URL: https://automationexercise.com
+          BASE_URL: http://localhost:3000
 
       - name: Upload a11y test results
         if: always()
@@ -219,6 +235,7 @@ jobs:
   deploy-reports:
     name: Deploy Reports to GitHub Pages
     needs: [test-smoke, test-api, test-a11y, test-regression, test-data-driven]
+    if: always()
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -235,30 +252,35 @@ jobs:
         with:
           name: smoke-test-results
           path: artifacts/smoke
+        continue-on-error: true
 
       - name: Download API test results
         uses: actions/download-artifact@v4
         with:
           name: api-test-results
           path: artifacts/api
+        continue-on-error: true
 
       - name: Download a11y test results
         uses: actions/download-artifact@v4
         with:
           name: a11y-test-results
           path: artifacts/a11y
+        continue-on-error: true
 
       - name: Download regression test results
         uses: actions/download-artifact@v4
         with:
           name: regression-test-results
           path: artifacts/regression
+        continue-on-error: true
 
       - name: Download data-driven test results
         uses: actions/download-artifact@v4
         with:
           name: data-driven-test-results
           path: artifacts/data-driven
+        continue-on-error: true
 
       - name: Setup Java (Required for Allure CLI)
         uses: actions/setup-java@v4
