@@ -372,7 +372,7 @@ jobs:
 
       - name: Copy Playwright HTML reports
         run: |
-          mkdir -p merged-reports/smoke merged-reports/api merged-reports/a11y merged-reports/regression merged-reports/data-driven
+          mkdir -p merged-reports/smoke merged-reports/api merged-reports/a11y merged-reports/regression merged-reports/data-driven merged-reports/security
           cp -r artifacts/smoke/playwright-report/* merged-reports/smoke/ 2>/dev/null || \
             echo '<html><body><h1>Smoke Tests</h1><p>No report available.</p></body></html>' > merged-reports/smoke/index.html
           cp -r artifacts/api/playwright-report/* merged-reports/api/ 2>/dev/null || \
