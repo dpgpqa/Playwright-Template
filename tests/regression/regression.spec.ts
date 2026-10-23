@@ -4,17 +4,23 @@ import { ProductsPage } from '@pages/ProductsPage';
 import { CartPage } from '@pages/CartPage';
 import { Header } from '@components/Header';
 
-test.describe('Regression: Full e2e flows @regression', () => {
-  (process.env.CI ? test.skip : test)('remove item from cart @regression', async ({ productsPage, cartPage, header }) => {
-    await productsPage.goto();
-    await productsPage.addToCartByIndex(0);
-    await header.goToCart();
+const skipInCI = process.env.CI === 'true';
 
-    const before = await cartPage.getItemCount();
-    expect(before).toBeGreaterThan(0);
+// Skipped in CI - AutomationExercise is an external demo site with Cloudflare
+// bot protection and inconsistent response times in CI runners.
+if (!skipInCI) {
+  test.describe('Regression: Full e2e flows @regression', () => {
+    test('remove item from cart @regression', async ({ productsPage, cartPage, header }) => {
+      await productsPage.goto();
+      await productsPage.addToCartByIndex(0);
+      await header.goToCart();
 
-    await cartPage.removeItemByIndex(0);
-    const after = await cartPage.getItemCount();
-    expect(after).toBe(before - 1);
+      const before = await cartPage.getItemCount();
+      expect(before).toBeGreaterThan(0);
+
+      await cartPage.removeItemByIndex(0);
+      const after = await cartPage.getItemCount();
+      expect(after).toBe(before - 1);
+    });
   });
-});
+}
