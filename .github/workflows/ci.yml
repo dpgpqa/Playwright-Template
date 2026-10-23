@@ -219,6 +219,7 @@ jobs:
   deploy-reports:
     name: Deploy Reports to GitHub Pages
     needs: [test-smoke, test-api, test-a11y, test-regression, test-data-driven]
+    if: always()
     runs-on: ubuntu-latest
     permissions:
       pages: write
