@@ -7,8 +7,8 @@ export class AutomationExerciseApiClient {
     private readonly baseURL: string = process.env.AUTOMATION_EXERCISE_API_BASE || 'https://automationexercise.com/api'
   ) {}
 
-  static async create(): Promise<AutomationExerciseApiClient> {
-    const api = await pwRequest.newContext({ 
+  static async create(apiContext?: APIRequestContext): Promise<AutomationExerciseApiClient> {
+    const api = apiContext ?? await pwRequest.newContext({ 
       baseURL: process.env.AUTOMATION_EXERCISE_API_BASE || 'https://automationexercise.com/api',
       extraHTTPHeaders: { 'Accept': 'application/json' },
     });

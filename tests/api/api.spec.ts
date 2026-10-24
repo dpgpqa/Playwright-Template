@@ -1,14 +1,12 @@
-import { test, expect } from '@fixtures/base.fixture';
+import { test, expect } from '@api/mocks/api.fixture';
 import { AutomationExerciseApiClient } from '@api/AutomationExerciseApiClient';
 import { DummyJsonApiClient } from '@api/DummyJsonApiClient';
-
-const skipInCI = process.env.CI === 'true';
 
 test.describe('API: AutomationExercise @api', () => {
   let api: AutomationExerciseApiClient;
 
-  test.beforeAll(async () => {
-    api = await AutomationExerciseApiClient.create();
+  test.beforeAll(async ({ automationExerciseApiRequest }) => {
+    api = await AutomationExerciseApiClient.create(automationExerciseApiRequest);
   });
 
   test.afterAll(async () => {
@@ -16,7 +14,6 @@ test.describe('API: AutomationExercise @api', () => {
   });
 
   test('GET /productsList returns products @api', async () => {
-    if (skipInCI) test.skip();
     const data = await api.getProductsList();
     expect(data.responseCode).toBe(200);
     expect(data.products.length).toBeGreaterThan(0);
@@ -26,28 +23,24 @@ test.describe('API: AutomationExercise @api', () => {
   });
 
   test('POST /searchProduct returns filtered results @api', async () => {
-    if (skipInCI) test.skip();
     const data = await api.searchProduct('top');
     expect(data.responseCode).toBe(200);
     expect(data.products.length).toBeGreaterThanOrEqual(0);
   });
 
   test('POST /verifyLogin with valid credentials succeeds @api', async () => {
-    if (skipInCI) test.skip();
-    const email = process.env.TEST_USER_EMAIL!;
-    const password = process.env.TEST_USER_PASSWORD!;
+    const email = 'qa_bot@example.com';
+    const password = 'Passw0rd!';
     const data = await api.verifyLogin(email, password);
     expect([200, 404]).toContain(data.responseCode);
   });
 
   test('POST /verifyLogin with invalid credentials fails @api', async () => {
-    if (skipInCI) test.skip();
     const data = await api.verifyLogin('invalid@example.com', 'wrongpass');
     expect([404, 200]).toContain(data.responseCode);
   });
 
   test('GET /brandsList returns brands @api', async () => {
-    if (skipInCI) test.skip();
     const data = await api.getBrandsList();
     expect(data.responseCode).toBe(200);
   });
@@ -56,8 +49,8 @@ test.describe('API: AutomationExercise @api', () => {
 test.describe('API: DummyJSON @api', () => {
   let api: DummyJsonApiClient;
 
-  test.beforeAll(async () => {
-    api = await DummyJsonApiClient.create();
+  test.beforeAll(async ({ dummyJsonApiRequest }) => {
+    api = await DummyJsonApiClient.create(dummyJsonApiRequest);
   });
 
   test.afterAll(async () => {
@@ -65,7 +58,6 @@ test.describe('API: DummyJSON @api', () => {
   });
 
   test('GET /products returns paginated list @api', async () => {
-    if (skipInCI) test.skip();
     const data = await api.getProducts({ limit: 5, select: 'id,title,price' });
     expect(data.products.length).toBe(5);
     expect(data.total).toBeGreaterThan(0);
@@ -75,7 +67,6 @@ test.describe('API: DummyJSON @api', () => {
   });
 
   test('GET /products/:id returns single product @api', async () => {
-    if (skipInCI) test.skip();
     const product = await api.getProductById(1);
     expect(product.id).toBe(1);
     expect(product.title).toBeTruthy();
@@ -83,14 +74,12 @@ test.describe('API: DummyJSON @api', () => {
   });
 
   test('GET /products/search?q=essence returns matches @api', async () => {
-    if (skipInCI) test.skip();
     const data = await api.searchProducts('essence', { limit: 3 });
     expect(data.products.length).toBeGreaterThan(0);
     expect(data.products[0].title.toLowerCase()).toContain('essence');
   });
 
   test('POST /auth/login returns tokens @api', async () => {
-    if (skipInCI) test.skip();
     const auth = await api.login('emilys', 'emilyspass');
     expect(auth.accessToken).toBeTruthy();
     expect(auth.refreshToken).toBeTruthy();
@@ -98,7 +87,6 @@ test.describe('API: DummyJSON @api', () => {
   });
 
   test('GET /auth/me returns current user @api', async () => {
-    if (skipInCI) test.skip();
     await api.login('emilys', 'emilyspass');
     const me = await api.getAuthMe();
     expect(me.id).toBeGreaterThan(0);
@@ -106,14 +94,12 @@ test.describe('API: DummyJSON @api', () => {
   });
 
   test('GET /users returns user list @api', async () => {
-    if (skipInCI) test.skip();
     const data = await api.getUsers({ limit: 3, select: 'id,firstName,lastName,email' });
     expect(data.users.length).toBe(3);
     expect(data.users[0]).toHaveProperty('id');
   });
 
   test('POST /carts/add creates cart @api', async () => {
-    if (skipInCI) test.skip();
     await api.login('emilys', 'emilyspass');
     const cart = await api.addCart({
       userId: 1,
@@ -125,7 +111,6 @@ test.describe('API: DummyJSON @api', () => {
   });
 
   test('CRUD product flow @api', async () => {
-    if (skipInCI) test.skip();
     const products = await api.getProducts({ limit: 1 });
     expect(products.products.length).toBe(1);
     expect(products.products[0]).toHaveProperty('id');

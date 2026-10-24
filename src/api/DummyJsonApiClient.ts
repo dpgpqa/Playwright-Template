@@ -9,8 +9,8 @@ export class DummyJsonApiClient {
     private readonly baseURL: string = process.env.DUMMYJSON_BASE_URL || 'https://dummyjson.com'
   ) {}
 
-  static async create(): Promise<DummyJsonApiClient> {
-    const api = await pwRequest.newContext({ 
+  static async create(apiContext?: APIRequestContext): Promise<DummyJsonApiClient> {
+    const api = apiContext ?? await pwRequest.newContext({ 
       baseURL: process.env.DUMMYJSON_BASE_URL || 'https://dummyjson.com',
       extraHTTPHeaders: { 'Accept': 'application/json' },
     });

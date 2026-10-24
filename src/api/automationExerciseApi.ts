@@ -39,6 +39,7 @@ export const UserSchema = z.object({
 export const APIResponseSchema = z.object({
   responseCode: z.number(),
   message: z.string(),
+  brands: z.array(z.object({ id: z.number(), brand: z.string() })).optional(),
 });
 
 export type Product = z.infer<typeof ProductSchema>;
