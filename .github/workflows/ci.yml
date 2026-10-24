@@ -356,12 +356,15 @@ jobs:
 
       - name: Download ZAP report from ZAP workflow
         run: |
+          set -x
           # Get latest successful ZAP workflow run
           ZAP_RUN_ID=$(gh api repos/${{ github.repository }}/actions/workflows/zap-dast.yml/runs --jq '.workflow_runs[] | select(.conclusion=="success" and .head_branch=="template-init") | .id' | head -1)
+          echo "DEBUG: ZAP_RUN_ID='$ZAP_RUN_ID'"
           if [ -n "$ZAP_RUN_ID" ]; then
             echo "Found ZAP run: $ZAP_RUN_ID"
             # Get artifact ID
             ARTIFACT_ID=$(gh api repos/${{ github.repository }}/actions/runs/$ZAP_RUN_ID/artifacts --jq '.artifacts[] | select(.name=="zap-security-report") | .id')
+            echo "DEBUG: ARTIFACT_ID='$ARTIFACT_ID'"
             if [ -n "$ARTIFACT_ID" ]; then
               echo "Downloading artifact: $ARTIFACT_ID"
               gh api repos/${{ github.repository }}/actions/artifacts/$ARTIFACT_ID/zip --raw > zap-report.zip
