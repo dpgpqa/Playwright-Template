@@ -452,6 +452,7 @@ Read [`SECURITY.md`](SECURITY.md) for the full policy. Summary:
 | `ci.yml` | push, PR to `template-init` | lint-and-typecheck, test-smoke, test-api, test-data-driven, test-a11y, test-regression, deploy-reports |
 | `security.yml` | push, PR, schedule | CodeQL, gitleaks (secret scanning), dependency review (PR only) |
 | `lighthouse.yml` | push, PR | Performance, accessibility, SEO budgets |
+| `zap-dast.yml` | push, schedule | ZAP Baseline DAST scan (OWASP) |
 
 ### Artifacts
 
@@ -473,6 +474,7 @@ Test reports are automatically generated on every CI run and available via **Git
 | **Data-Driven Tests** | [📊 Open live test report →](https://dpgpqa.github.io/Playwright-Template/data-driven/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) |
 | **Accessibility** | [♿ Open live test report →](https://dpgpqa.github.io/Playwright-Template/a11y/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) |
 | **Regression** | [🔄 Open live test report →](https://dpgpqa.github.io/Playwright-Template/regression/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/ci.yml) |
+| **Security (ZAP)** | [🛡️ Open live test report →](https://dpgpqa.github.io/Playwright-Template/security/) | [Download](https://github.com/dpgpqa/Playwright-Template/actions/workflows/zap-dast.yml) |
 
 Reports are generated using Playwright's built-in HTML reporter and updated on every push to any branch. The index page shows links to each suite, the latest run info, and commit details.
 
