@@ -356,27 +356,27 @@ jobs:
 
       - name: Download ZAP report from ZAP workflow
         run: |
-          set -x
+          set -euo pipefail
           # Get latest successful ZAP workflow run
-          ZAP_RUN_ID=$(gh api repos/${{ github.repository }}/actions/workflows/zap-dast.yml/runs --jq '.workflow_runs[] | select(.conclusion=="success" and .head_branch=="template-init") | .id' | head -1)
-          echo "DEBUG: ZAP_RUN_ID='$ZAP_RUN_ID'"
-          if [ -n "$ZAP_RUN_ID" ]; then
-            echo "Found ZAP run: $ZAP_RUN_ID"
-            # Get artifact ID
-            ARTIFACT_ID=$(gh api repos/${{ github.repository }}/actions/runs/$ZAP_RUN_ID/artifacts --jq '.artifacts[] | select(.name=="zap-security-report") | .id')
-            echo "DEBUG: ARTIFACT_ID='$ARTIFACT_ID'"
-            if [ -n "$ARTIFACT_ID" ]; then
-              echo "Downloading artifact: $ARTIFACT_ID"
-              gh api repos/${{ github.repository }}/actions/artifacts/$ARTIFACT_ID/zip --raw > zap-report.zip
-              mkdir -p artifacts/zap
-              unzip -o zap-report.zip -d artifacts/zap
-              ls -la artifacts/zap/
-            else
-              echo "No zap-security-report artifact found in ZAP run $ZAP_RUN_ID"
-            fi
-          else
+          ZAP_RUN_ID=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"             -H "Accept: application/vnd.github+json"             "https://api.github.com/repos/${{ github.repository }}/actions/workflows/zap-dast.yml/runs?per_page=10"             | jq -r '.workflow_runs[] | select(.conclusion=="success" and .head_branch=="template-init") | .id' | head -1)
+          echo "Found ZAP run: $ZAP_RUN_ID"
+          if [ -z "$ZAP_RUN_ID" ]; then
             echo "No successful ZAP run found for template-init"
+            exit 0
           fi
+          # Get artifact ID
+          ARTIFACT_ID=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"             -H "Accept: application/vnd.github+json"             "https://api.github.com/repos/${{ github.repository }}/actions/runs/$ZAP_RUN_ID/artifacts"             | jq -r '.artifacts[] | select(.name=="zap-security-report") | .id')
+          echo "Artifact ID: $ARTIFACT_ID"
+          if [ -z "$ARTIFACT_ID" ]; then
+            echo "No zap-security-report artifact found in ZAP run $ZAP_RUN_ID"
+            exit 0
+          fi
+          # Download artifact
+          echo "Downloading artifact: $ARTIFACT_ID"
+          curl -s -L -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"             -H "Accept: application/vnd.github+json"             "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$ARTIFACT_ID/zip"             -o zap-report.zip
+          mkdir -p artifacts/zap
+          unzip -o zap-report.zip -d artifacts/zap
+          ls -la artifacts/zap/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
