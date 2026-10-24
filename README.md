@@ -576,6 +576,267 @@ npx lint-staged
 - [`tests/visual/README.md`](tests/visual/README.md) — baseline-per-browser convention
 - [`docs/flake-handling.md`](docs/flake-handling.md) — flake taxonomy + playbook
 - [`docs/contacts.md`](docs/contacts.md) — team contacts, Jira keys, escalation, token rotation
+- [`docs/quarantine-strategy.md`](docs/quarantine-strategy.md) — flake quarantine playbook
+- [`docs/slos.md`](docs/slos.md) — SLOs & coverage targets
+- [`config/environments/README.md`](config/environments/README.md) — multi-environment setup
+
+---
+
+## ZAP DAST Security Scan
+
+### What it does
+Runs **OWASP ZAP Baseline Scan** against `automationexercise.com` (or your `BASE_URL`) on every push and weekly. Uses the official Docker image `ghcr.io/zaproxy/zaproxy:stable` — no Java install needed.
+
+### How to read the report
+| Report | Location | What you'll see |
+|--------|----------|-----------------|
+| HTML | `https://dpgpqa.github.io/Playwright-Template/security/` | Interactive dashboard with alerts grouped by risk |
+| JSON | Artifact `zap-security-report` → `report_json.json` | Machine-readable for CI parsing |
+| Markdown | Artifact `zap-security-report` → `report_md.md` | Human-readable summary for PR comments |
+
+### Alert levels
+| Level | Meaning | Action |
+|-------|---------|--------|
+| **FAIL** | Confirmed vulnerability (SQLi, XSS, RCE) | **Block merge** — fix immediately |
+| **WARN** | Potential issue (missing headers, info disclosure) | Review — accept risk or fix |
+| **INFO** | Informational (tech stack detection) | No action needed |
+| **PASS** | Check passed | — |
+
+### Common warnings on automationexercise.com (expected)
+- `Strict-Transport-Security Header Not Set` — HSTS missing
+- `Content Security Policy (CSP) Header Not Set` — no CSP
+- `Server Leaks Information via "X-Powered-By"` — reveals Django
+- `Absence of Anti-CSRF Tokens` — login/signup forms unprotected
+- `Full Path Disclosure` — Django debug paths in 404s
+
+These are **known limitations of the demo site**, not your code. In your app, fix the root cause (add headers, enable CSRF, disable debug).
+
+### Customizing rules
+Edit `.zap/rules.tsv` to:
+- Change alert thresholds (WARN → IGNORE)
+- Add custom rules for your stack
+- Suppress known false positives by URL pattern
+
+---
+
+## Lighthouse CI
+
+### What it does
+Runs **Lighthouse** on every push/PR against a static test page (`public/index.html`) served via `http-server`. Enforces performance, accessibility, SEO, and best-practice budgets.
+
+### Budgets (`lighthouserc.yml`)
+```yaml
+budgets:
+  - resourceSizes:
+      - resourceType: total
+        budget: 200      # KB
+      - resourceType: script
+        budget: 80
+      - resourceType: css
+        budget: 40
+      - resourceType: image
+        budget: 100
+      - resourceType: font
+        budget: 50
+    resourceCounts:
+      - resourceType: third-party
+        budget: 10
+```
+
+| Category | Threshold | Fail if |
+|----------|-----------|---------|
+| Performance | ≥ 90 | Score < 90 |
+| Accessibility | ≥ 95 | Score < 95 |
+| Best Practices | ≥ 90 | Score < 90 |
+| SEO | ≥ 90 | Score < 90 |
+
+### Reports
+| Format | Location |
+|--------|----------|
+| HTML | GitHub Actions artifact `lighthouse-report` |
+| JSON | Artifact for CI parsing |
+| GitHub Pages | Not deployed (Lighthouse HTML is standalone) |
+
+### Interpreting results
+- **Performance < 90** → Check `Largest Contentful Paint`, `Total Blocking Time`, `Cumulative Layout Shift`
+- **Accessibility < 95** → Review contrast, ARIA labels, heading order
+- **CI failure** = budget exceeded → optimize assets, reduce JS, enable compression
+
+### Running locally
+```bash
+npm run lighthouse    # Runs against http://localhost:3000
+npx lighthouse http://localhost:3000 --output=html --output-path=./lighthouse-report.html
+```
+
+---
+
+## Quarantine (@quarantine)
+
+### Purpose
+Isolate **flaky tests** so they:
+- Run in a separate CI job (`test-quarantine`)
+- **Don't block merge** (job has `continue-on-error: true`)
+- Are visible for triage but don't noise the main pipeline
+
+### When to use `@quarantine`
+| Scenario | Tag |
+|----------|-----|
+| Test fails 1/10 runs due to timing | `@quarantine` |
+| External dependency (API, auth) intermittently fails | `@quarantine` |
+| Known bug with ticket open — test documents expected failure | `@quarantine` |
+| New test not yet stabilized | `@quarantine` |
+
+### How it works
+```typescript
+// tests/quarantine/quarantine.spec.ts
+import { test } from '@fixtures/base.fixture';
+
+test('@quarantine flaky login', async ({ loginPage }) => {
+  // Only runs when CI_QUARANTINE=true
+});
+```
+
+```yaml
+# .github/workflows/ci.yml
+test-quarantine:
+  if: always()
+  env:
+    CI_QUARANTINE: 'true'
+  run: npx playwright test --grep @quarantine
+```
+
+### Viewing quarantined tests
+| Method | Command |
+|--------|---------|
+| **Local** | `CI_QUARANTINE=true npx playwright test --grep @quarantine` |
+| **CI** | Check "Quarantine Tests" job in Actions |
+| **List all** | `npx playwright test --list | grep @quarantine` |
+
+### Graduation process
+1. Test runs green 10× in a row in quarantine
+2. Root cause fixed (selector, wait, mock)
+3. Remove `@quarantine` tag → moves to appropriate suite (`@smoke`, `@regression`, etc.)
+4. Delete from `tests/quarantine/`
+
+---
+
+## Multi-Environment Configs
+
+### Structure
+```
+config/environments/
+├── .env.development   # Local dev (your machine)
+├── .env.staging       # Staging / preview environments
+├── .env.production    # Production-like (for load/perf)
+└── README.md
+```
+
+### Variables per environment
+| Variable | Development | Staging | Production |
+|----------|-------------|---------|------------|
+| `BASE_URL` | `https://automationexercise.com` | `https://staging.yourapp.com` | `https://yourapp.com` |
+| `DUMMYJSON_BASE_URL` | `https://dummyjson.com` | `https://api-staging.yourapp.com` | `https://api.yourapp.com` |
+| `TEST_USER_EMAIL` | `qa_bot@example.com` | `staging_user@yourapp.com` | `prod_smoke@yourapp.com` |
+| `HEADLESS` | `false` | `true` | `true` |
+| `RETRIES` | `0` | `1` | `2` |
+| `WORKERS` | `4` | `2` | `1` |
+
+### Usage
+```bash
+# Development (default)
+npm run test:smoke
+
+# Staging
+npm run env:staging && npm run test:smoke
+
+# Production
+npm run env:prod && npm run test:smoke
+```
+
+### In CI
+```yaml
+# .github/workflows/ci.yml
+- name: Load staging env
+  if: github.ref == 'refs/heads/staging'
+  run: |
+    cat config/environments/.env.staging >> $GITHUB_ENV
+```
+
+### Adding a new environment
+1. Copy `.env.development` → `.env.<name>`
+2. Adjust values
+3. Add script in `package.json`: `"env:<name>": "cp config/environments/.env.<name> .env.local"`
+4. Reference in CI workflow if needed
+
+---
+
+## Test Coverage (nyc)
+
+### What it measures
+**Statement / Branch / Function / Line** coverage of **test files** (`tests/**/*.spec.ts`) against **source files** (`src/**/*.ts`).
+
+> Note: Coverage is on **test code**, not application code (Playwright tests a remote app, not local TS).
+
+### Configuration (`nyc.config.js`)
+```javascript
+module.exports = {
+  all: true,
+  instrument: false,
+  checkCoverage: false,        // Template has ~27% — threshold is aspirational
+  lines: 40,
+  functions: 40,
+  branches: 25,
+  statements: 40,
+  exclude: [
+    'tests/visual/**',          // Visual tests = screenshots, no logic
+    'tests/quarantine/**',      // Flaky by definition
+    '**/*.d.ts',
+    'playwright.config.ts'
+  ],
+  reporter: ['text', 'html', 'lcov', 'json-summary'],
+  reportsDir: './coverage'
+};
+```
+
+### Current thresholds (aspirational for template)
+| Metric | Threshold | Status |
+|--------|-----------|--------|
+| Statements | 40% | ~27% |
+| Functions | 40% | ~27% |
+| Branches | 25% | ~18% |
+| Lines | 40% | ~27% |
+
+### Running coverage
+```bash
+# Local with HTML report
+npm run test:coverage
+
+# CI mode (no HTML, exit code based on checkCoverage)
+npm run test:coverage:ci
+```
+
+### Reports
+| Format | Location |
+|--------|----------|
+| HTML | `coverage/index.html` (local) |
+| LCOV | `coverage/lcov.info` (for SonarQube/Codecov) |
+| JSON | `coverage/coverage-summary.json` (CI parsing) |
+| GitHub Actions | Artifact `coverage-report` |
+
+### Interpreting low coverage in this template
+- **Expected** — template has many POMs/fixtures/factories but few tests
+- **Real app** — aim for ≥80% statements/functions, ≥70% branches
+- **Focus** on covering: fixtures, factories, API clients, utils (not POMs — tested via E2E)
+
+### Raising thresholds
+Edit `nyc.config.js` when your test suite grows:
+```javascript
+checkCoverage: true,  // Enable gate
+lines: 80,
+functions: 80,
+branches: 70,
+statements: 80
+```
 
 ---
 
