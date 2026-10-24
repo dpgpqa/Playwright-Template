@@ -382,9 +382,10 @@ jobs:
           cp -r artifacts/regression/playwright-report/* merged-reports/regression/ 2>/dev/null || \
             echo '<html><body><h1>Regression Tests</h1><p>No report available.</p></body></html>' > merged-reports/regression/index.html
           cp -r artifacts/data-driven/playwright-report/* merged-reports/data-driven/ 2>/dev/null || \
-            echo '<html><body><h1>Data-Driven Tests</h1><p>No report available.</p></body></html>' > merged-reports/data-driven/index.html
-          cp -r artifacts/zap/* merged-reports/security/ 2>/dev/null || \
-            echo '<html><body><h1>ZAP DAST Security Scan</h1><p>No report available.</p></body></html>' > merged-reports/security/index.html
+                      echo '<html><body><h1>Data-Driven Tests</h1><p>No report available.</p></body></html>' > merged-reports/data-driven/index.html
+                    # ZAP report: rename report_html.html to index.html
+                    cp artifacts/zap/report_html.html merged-reports/security/index.html 2>/dev/null || \
+                      echo '<html><body><h1>ZAP DAST Security Scan</h1><p>No report available.</p></body></html>' > merged-reports/security/index.html
 
       - name: Create index page
         run: |
