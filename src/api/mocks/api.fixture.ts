@@ -1,18 +1,13 @@
 import { test as base, APIRequestContext } from '@playwright/test';
-import { startMockServer, stopMockServer } from './server.js';
+import { startMockServer } from './server.js';
 
 /**
  * API test fixtures with shared Mock HTTP Server per worker
  * One server per worker, shared between both fixtures
  */
 
-type APIFixtures = {
-  automationExerciseApiRequest: APIRequestContext;
-  dummyJsonApiRequest: APIRequestContext;
-};
-
 // Module-level server state - shared across fixtures in same worker
-let workerServerUrl: string | null = null;
+const workerServerUrl: string | null = null;
 
 function getWorkerPort(): number {
   const workerIndex = process.env.TEST_WORKER_INDEX ? parseInt(process.env.TEST_WORKER_INDEX, 10) : 0;
@@ -28,12 +23,13 @@ async function getOrStartWorkerServer(): Promise<string> {
   return url;
 }
 
-export const test = base.extend<{}, {
+export const test = base.extend<object, {
   automationExerciseApiRequest: APIRequestContext;
   dummyJsonApiRequest: APIRequestContext;
 }>({
   // Worker-scoped: runs once per worker process
   automationExerciseApiRequest: [
+    // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
       const mockServerUrl = await getOrStartWorkerServer();
 
@@ -50,6 +46,7 @@ export const test = base.extend<{}, {
   ],
 
   dummyJsonApiRequest: [
+    // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
       const mockServerUrl = await getOrStartWorkerServer();
 

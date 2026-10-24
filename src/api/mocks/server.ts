@@ -43,54 +43,55 @@ const dummyCarts = [
   { id: 1, userId: 1, products: [{ id: 1, quantity: 2 }, { id: 2, quantity: 1 }], total: 150, discountedTotal: 140, totalProducts: 3, totalQuantity: 3 },
 ];
 
-let authTokens = new Map<string, string>();
+const authTokens = new Map<string, string>();
 
 function createMockServer() {
   const fastify = Fastify({ logger: false });
 
   // Universal body parser that handles JSON, form-urlencoded, and text
-    fastify.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string' }, (req, body, done) => {
-      console.log('[MockServer] Form body parser called');
-      const bodyStr = typeof body === 'string' ? body : body.toString();
-      if (!bodyStr || bodyStr.trim() === '') {
-        done(null, {});
-        return;
+  fastify.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string' }, (req, body, done) => {
+    console.log('[MockServer] Form body parser called');
+    const bodyStr = typeof body === 'string' ? body : body.toString();
+    if (!bodyStr || bodyStr.trim() === '') {
+      done(null, {});
+      return;
+    }
+    try {
+      const params = new URLSearchParams(bodyStr);
+      const result: Record<string, string> = {};
+      for (const [key, value] of params) {
+        result[key] = value;
       }
-      try {
-        const params = new URLSearchParams(bodyStr);
-        const result = {};
-        for (const [key, value] of params) {
-          result[key] = value;
-        }
-        done(null, result);
-      } catch {
-        done(null, { raw: body });
-      }
-    });
+      done(null, result);
+    } catch {
+      done(null, { raw: bodyStr });
+    }
+  });
 
-    fastify.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {
+  fastify.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {
       try {
-        const parsed = JSON.parse(body);
-        done(null, parsed);
-      } catch {
-        done(null, { raw: body });
-      }
-    });
-
-    // Catch-all for other content types
-    fastify.addContentTypeParser('*', { parseAs: 'string' }, (req, body, done) => {
-      const bodyStr = typeof body === 'string' ? body : body.toString();
-      if (!bodyStr || bodyStr.trim() === '') {
-        done(null, {});
-        return;
-      }
-      try {
+        const bodyStr = typeof body === 'string' ? body : body.toString();
         const parsed = JSON.parse(bodyStr);
         done(null, parsed);
       } catch {
-        done(null, { raw: bodyStr });
+        done(null, { raw: body });
       }
     });
+
+  // Catch-all for other content types
+  fastify.addContentTypeParser('*', { parseAs: 'string' }, (req, body, done) => {
+    const bodyStr = typeof body === 'string' ? body : body.toString();
+    if (!bodyStr || bodyStr.trim() === '') {
+      done(null, {});
+      return;
+    }
+    try {
+      const parsed = JSON.parse(bodyStr);
+      done(null, parsed);
+    } catch {
+      done(null, { raw: bodyStr });
+    }
+  });
 
   // Add request logging
   fastify.addHook('onRequest', async (request) => {
@@ -278,11 +279,11 @@ function createMockServer() {
             });
 
       return fastify;
-      }
+              }
 
-      let mockServer = null;
+              let mockServer: Awaited<ReturnType<typeof createMockServer>> | null = null;
 
-      async function startMockServer(port = 3001): Promise<string> {
+              async function startMockServer(port = 3001): Promise<string> {
   if (mockServer) {
     return 'http://localhost:' + port;
   }
